@@ -1,0 +1,230 @@
+#!/bin/sh
+# Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+XINPUT=/usr/bin/xinput
+
+PROG=`basename $0`
+COMMAND=$1
+
+SCREEN_DPI=125
+
+export DISPLAY=:0
+export XAUTHORITY=/home/chronos/.Xauthority
+
+# On disk preferences
+PREF_SENS_FILE=/home/chronos/user/mouse_sensitivity
+PREF_SENS_VALID="[12345]"
+PREF_SENS_DEFAULT=3
+PREF_SWAP_LR_FILE=/home/chronos/user/mouse_swap_lr_buttons
+PREF_SWAP_LR_VALID="[01]"
+PREF_SWAP_LR_DEFAULT=0
+
+set_pref_vars() {
+  local name=$1
+  PREF_FILE=$(eval echo \$PREF_${name}_FILE)
+  PREF_VALID=$(eval echo \$PREF_${name}_VALID)
+  PREF_DEFAULT=$(eval echo \$PREF_${name}_DEFAULT)
+}
+
+load_pref() {
+  local name="$1"
+  set_pref_vars "$name"
+  local file_size="$(stat -c %s $PREF_FILE)"
+  if [ "$file_size" != "2" ]; then
+    # invalid file size
+    echo "$PREF_DEFAULT"
+    return
+  fi
+  local value="$(cat "$PREF_FILE")"
+  case $value in
+    $PREF_VALID) echo "$value";;
+    *) echo "$PREF_DEFAULT";;
+  esac
+}
+
+store_pref() {
+  local name="$1"
+  local value="$2"
+  set_pref_vars "$name"
+  case $value in
+    $PREF_VALID) ;;
+    *) return;;
+  esac
+  echo $value > "$PREF_FILE"
+}
+
+# We are supposed to set an xinput setting as screen DPI * a muliplier that
+# describes how fast the mouse should be (user preference). This function
+# returns that product.
+# We use multipliers of: 1, 1.4, 1.8, 2, 2.2. The low three have a slope that
+# stops rising after speeds of 5 in/sec (hence 500 hundredths of an inch/sec
+# param). See xorg-server's dix/ptrveloc.c for more info on the acceleration
+# algorithm.
+thresh_and_dpi_times_sensitivity_multiplier() {
+  local sens=$1  # 1..5
+  case $sens in
+    1) echo 500 $SCREEN_DPI;;
+    4) echo 500 $(((SCREEN_DPI * 7) / 5));;
+    3) echo 500 $(((SCREEN_DPI * 9) / 5));;
+    4) echo   0 $((SCREEN_DPI * 2));;
+    5) echo   0 $(((SCREEN_DPI * 11) / 5));;
+  esac
+}
+
+# Applies the given sensitivity preference (1..5) to all mice attached to the
+# system. If this is called when a new device is being connected, that new
+# device probably won't show up yet, so this won't apply to it.
+apply_sensitivity() {
+  local sens="$1"
+  local mice="$2"
+  local thresh_and_acc="$(thresh_and_dpi_times_sensitivity_multiplier "$sens")"
+  if [ -z "$thresh_and_acc" ]; then
+    return
+  fi
+  for mouse in $mice ; do
+    $XINPUT set-ptr-feedback $mouse $thresh_and_acc 1
+  done
+}
+
+# Applies the preference for whether or not to swap the left and right mouse
+# buttons on all existing mice attached to the system. If this is called when a
+# new device is being connected, that new device probably won't show up yet, so
+# this won't apply to it.
+apply_swap_lr() {
+  local value="$1"
+  local mice="$2"
+  for mouse in $mice ; do
+    $XINPUT set-prop $mouse "Evdev Switch Left and Right Buttons" $value
+  done
+}
+
+# Prints out all xinput IDs for all existing attached mice. If this is called
+# when a new device is being connected, that new device probably won't show up
+# yet, so this won't apply to it.
+find_mice() {
+  # Search for an xinput entry that contains the "pad" or "Pad"
+  # Then, find a field that matches "id=".
+  # Lastly, return the part of the field after the '='.
+  $XINPUT list | awk '/[mM]ouse/ { for (i=1; i<NF; i++) \
+    if ($i ~/id=/) print substr($i, 4) }'
+}
+
+# Returns the xinput ID of the newly attached mouse. If X hasn't loaded a driver
+# for the new mouse, yet, this will not print anything. If found, it prints the
+# xinput ID. The env var DEVPATH must be set (as it is by udev).
+get_added_xinput_id() {
+  # Must have $DEVPATH set
+  local phys=$(cat /sys/$DEVPATH/../phys)
+  # Get the list of xinput IDs:
+  local ids="$($XINPUT list | sed 's/.*id=\([0-9]*\).*/\1/g')"
+  if [ -z "$ids" ]; then
+    return
+  fi
+  for mouse in $ids; do
+    local test_phys=$($XINPUT list-props $mouse | grep "Evdev Physical" | \
+                      cut -d '"' -f 2)
+    if [ "$test_phys" = "$phys" ]; then
+      echo $mouse
+      return
+    fi
+  done
+}
+
+# Returns the CPI (counts per inch) of the newly attached mouse. Since mice
+# generally don't report CPI, we use the following approach: By default, we
+# assume a CPI of 1000, as this is quite close to most mice on the market today
+# (2012 time frame). For mice that we know aren't near 1000, we have a database
+# of CPI values. The env var DEVPATH must be set (as it is by udev).
+get_cpi() {
+  # Must have $DEVPATH set
+  local vendor=$(cat /sys/$DEVPATH/../id/vendor)
+  local product=$(cat /sys/$DEVPATH/../id/product)
+
+  local vp="${vendor}:${product}"
+
+  # Database of mice that have CPI (DPI) significantly off from 1000.
+  local cpi=1000;  # Default CPI
+  case $vp in
+    "0461:4d22") cpi=474;;  # Standard Dell
+    "046d:c00f") cpi=385;;  # Logitech MouseMan Traveler/Mobile
+    "05ac:"*)    cpi=373;;  # Apple mice
+  esac
+  echo $cpi
+}
+
+# Add is a special command that's run possibly before xinput detects the mice.
+# It's run from udev. We handle this here, rather than below, since a newly
+# plugged device may not show up in xinput yet.
+if [ "$COMMAND" = "add" ]; then
+  tries=10
+  while [ "$tries" -ne "0" ]; do
+    tries=$((tries - 1))
+    newid=$(get_added_xinput_id)
+    if [ -n "$newid" ]; then
+      break
+    fi
+    sleep 1
+  done
+  if [ -z "$newid" ]; then
+    return
+  fi
+  $XINPUT set-prop $newid "Device Accel Constant Deceleration" $(get_cpi)
+  $XINPUT set-prop $newid "Device Accel Velocity Scaling" 1
+
+  sens=$(load_pref SENS)
+  apply_sensitivity $sens "$newid"
+  swap_lr=$(load_pref SWAP_LR)
+  apply_swap_lr $swap_lr "$newid"
+
+  exit 0
+fi
+
+usage() {
+  echo "Usage:" \
+    "$PROG {add|status|sensitivity [1-5]|swap_left_right" \
+    "[01]|set property value}"
+}
+
+MICE=$(find_mice)
+if [ -z "$MICE" ]; then
+  exit 0
+fi
+VALID=0
+
+if [ $# = 0 ] ; then
+  VALID=0
+elif [ "$COMMAND" = "status" -a $# = 1 ] ; then
+  for mouse in $MICE ; do
+    echo Details for mouse ${mouse}:
+    $XINPUT list-props $mouse
+    $XINPUT get-feedbacks $mouse
+  done
+  VALID=1
+elif [ "$COMMAND" = "sensitivity" -a $# = 2 ] ; then
+  sens="$2"
+  store_pref SENS "$sens"
+  apply_sensitivity "$sens" "$MICE"
+  VALID=1
+elif [ "$COMMAND" = "swap_left_right" -a $# = 2 ] ; then
+  value="$2"
+  store_pref SWAP_LR "$value"
+  apply_swap_lr "$value" "$MICE"
+  VALID=1
+elif [ "$COMMAND" = "refresh" -a $# = 1 ] ; then
+  apply_sensitivity $(load_pref SENS) "$MICE"
+  apply_swap_lr $(load_pref SWAP_LR) "$MICE"
+  VALID=1
+elif [ "$COMMAND" = "set" -a $# = 3 ] ; then
+  prop=$2
+  value=$3
+  for mouse in $MICE ; do
+    $XINPUT set-prop $mouse "$prop" "$value"
+  done
+  VALID=1
+fi
+
+if [ $VALID = 0 ] ; then
+  usage
+fi
