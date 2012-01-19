@@ -112,8 +112,15 @@ find_mice() {
   # Search for an xinput entry that contains the "pad" or "Pad"
   # Then, find a field that matches "id=".
   # Lastly, return the part of the field after the '='.
-  $XINPUT list | awk '/[mM]ouse/ { for (i=1; i<NF; i++) \
-    if ($i ~/id=/) print substr($i, 4) }'
+  local potential_mice="$($XINPUT list | \
+    awk '/slave *pointer/ { for (i=1; i<NF; i++) \
+    if ($i ~/id=/) print substr($i, 4) }')"
+  for mouse in $potential_mice ; do
+    local match=$($XINPUT list-props $mouse | grep "Evdev" | wc -l)
+    if [ "$match" != "0" ]; then
+      echo "$mouse"
+    fi
+  done
 }
 
 # Returns the xinput ID of the newly attached mouse. If X hasn't loaded a driver
