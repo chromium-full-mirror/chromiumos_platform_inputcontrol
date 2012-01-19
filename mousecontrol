@@ -161,8 +161,12 @@ get_cpi() {
   case $vp in
     "0461:4d22") cpi=474;;  # Standard Dell
     "046d:c00f") cpi=385;;  # Logitech MouseMan Traveler/Mobile
+    "046d:c408") cpi=300;;  # Logitech Trackball*
+    "047d:1002") cpi=300;;  # Kensington Turbo Mouse Pro (trackball)*
+    "047d:1020") cpi=300;;  # Kensington Expert Mouse (trackball)*
     "05ac:"*)    cpi=373;;  # Apple mice
   esac
+  # * Trackball measurements are approximate
   echo $cpi
 }
 
