@@ -95,8 +95,13 @@ apply_sensitivity() {
 apply_swap_lr() {
   local value="$1"
   local mice="$2"
+  local map="1 2 3"
+  if [ "$value" -eq 1 ]; then
+    map="3 2 1"
+  fi
   for mouse in $mice ; do
-    $XINPUT set-prop $mouse "Evdev Switch Left and Right Buttons" $value
+    $XINPUT get-button-map $mouse | sed "s/^[0-9]* [0-9]* [0-9]*/$map/" | \
+        xargs $XINPUT set-button-map $mouse
   done
 }
 
