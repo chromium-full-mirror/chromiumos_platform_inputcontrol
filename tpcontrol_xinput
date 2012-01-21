@@ -5,6 +5,9 @@
 
 XINPUT=/usr/bin/xinput
 
+export DISPLAY=:0
+export XAUTHORITY=/home/chronos/.Xauthority
+
 PROG=`basename $0`
 COMMAND=$1
 
