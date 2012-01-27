@@ -8,13 +8,23 @@ XINPUT=/usr/bin/xinput
 export DISPLAY=:0
 export XAUTHORITY=/home/chronos/.Xauthority
 
+. /opt/google/mouse/common
+
 PROG=`basename $0`
 COMMAND=$1
+
+# On disk preferences
+PREF_SENS_FILE=/home/chronos/user/touchpad_sensitivity
+PREF_SENS_VALID="[12345]"
+PREF_SENS_DEFAULT=3
+PREF_TAP_FILE=/home/chronos/user/touchpad_tap_enable
+PREF_TAP_VALID="[01]"
+PREF_TAP_DEFAULT=0
 
 usage() {
   echo "Usage:"\
     "$PROG {status|log|taptoclick [on|off]|sensitivity [1-5]|"\
-    "set <property> <value>}"
+    "set <property> <value>|add}"
 }
 
 find_pad() {
@@ -58,22 +68,39 @@ elif [ "$COMMAND" = "taptoclick" -a $# = 2 ] ; then
   VALUE=$2
   case $VALUE in
   "on")
-    $XINPUT set-prop $DEVICE "Tap Enable" 1
+    NUM_VAL="1"
     VALID=1
     ;;
   "off")
-    $XINPUT set-prop $DEVICE "Tap Enable" 0
+    NUM_VAL="0"
     VALID=1
     ;;
   esac
+  if [ "$VALID" != "0" ]; then
+    $XINPUT set-prop $DEVICE "Tap Enable" "$NUM_VAL"
+    store_pref TAP "$NUM_VAL"
+  fi
 elif [ "$COMMAND" = "sensitivity" -a $# = 2 ] ; then
   VALUE=$2
   $XINPUT set-prop $DEVICE "Sensitivity" "$VALUE"
+  store_pref SENS "$VALUE"
   VALID=1
 elif [ "$COMMAND" = "set" -a $# = 3 ] ; then
   PROP=$2
   VALUE=$3
   $XINPUT set-prop $DEVICE "$PROP" "$VALUE"
+  VALID=1
+elif [ "$COMMAND" = "add" -a $# = 1 ] ; then
+  # New device. Set sensitivity/tap enable
+  # Give some time for device to arrive, if necessary
+  if [ -z "$DEVICE" ]; then
+    sleep 2
+    DEVICE="$(find_pad)"
+  fi
+  TAP_VAL=$(load_pref TAP)
+  SENS_VAL=$(load_pref SENS)
+  $XINPUT set-prop $DEVICE "Sensitivity" "$SENS_VAL"
+  $XINPUT set-prop $DEVICE "Tap Enable" "$TAP_VAL"
   VALID=1
 fi
 

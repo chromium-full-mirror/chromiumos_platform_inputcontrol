@@ -1,0 +1,39 @@
+#!/bin/sh
+# Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+set_pref_vars() {
+  local name=$1
+  PREF_FILE=$(eval echo \$PREF_${name}_FILE)
+  PREF_VALID=$(eval echo \$PREF_${name}_VALID)
+  PREF_DEFAULT=$(eval echo \$PREF_${name}_DEFAULT)
+}
+
+load_pref() {
+  local name="$1"
+  set_pref_vars "$name"
+  local file_size="$(stat -c %s $PREF_FILE)"
+  if [ "$file_size" != "2" ]; then
+    # invalid file size
+    echo "$PREF_DEFAULT"
+    return
+  fi
+  local value="$(cat "$PREF_FILE")"
+  case $value in
+    $PREF_VALID) echo "$value";;
+    *) echo "$PREF_DEFAULT";;
+  esac
+}
+
+store_pref() {
+  local name="$1"
+  local value="$2"
+  set_pref_vars "$name"
+  case $value in
+    $PREF_VALID) ;;
+    *) return;;
+  esac
+  echo $value > "$PREF_FILE"
+}
+

@@ -3,19 +3,23 @@
 # found in the LICENSE file.
 
 MOUSE_SCRIPTS=\
+	common \
 	mouse_added \
 	mousecontrol
 
 MOUSE_SCRIPTS_DIR=/opt/google/mouse
 
 TP_SCRIPTS=\
+	touchpad_added \
 	tpcontrol \
 	tpcontrol_synclient \
 	tpcontrol_xinput
 
 TP_SCRIPTS_DIR=/opt/google/touchpad
 
-UDEV_RULE=99-mouse.rules
+MOUSE_UDEV_RULE=99-mouse.rules
+
+TP_UDEV_RULE=99-touchpad.rules
 
 UPSTART_CONF=mouse.conf
 
@@ -28,7 +32,10 @@ install: $(MOUSE_SCRIPTS) $(TP_SCRIPTS) $(UDEV_RULE) $(UPSTART_CONF)
 	mkdir -p $(DESTDIR)/$(TP_SCRIPTS_DIR)
 	cp -p $(TP_SCRIPTS) $(DESTDIR)/$(TP_SCRIPTS_DIR)
 	chmod 0755 $(DESTDIR)/$(TP_SCRIPTS_DIR)/*
-	install -D -m 0644 $(UDEV_RULE) \
-		$(DESTDIR)/etc/udev/rules.d/$(UDEV_RULE)
+
+	install -D -m 0644 $(MOUSE_UDEV_RULE) \
+		$(DESTDIR)/etc/udev/rules.d/$(MOUSE_UDEV_RULE)
+	install -D -m 0644 $(TP_UDEV_RULE) \
+		$(DESTDIR)/etc/udev/rules.d/$(TP_UDEV_RULE)
 	install -D -m 0644 $(UPSTART_CONF) \
 		$(DESTDIR)/etc/init/$(UPSTART_CONF)

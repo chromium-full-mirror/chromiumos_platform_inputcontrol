@@ -10,6 +10,8 @@ COMMAND=$1
 
 SCREEN_DPI=125
 
+. $(dirname "$0")/common
+
 export DISPLAY=:0
 export XAUTHORITY=/home/chronos/.Xauthority
 
@@ -20,40 +22,6 @@ PREF_SENS_DEFAULT=3
 PREF_SWAP_LR_FILE=/home/chronos/user/mouse_swap_lr_buttons
 PREF_SWAP_LR_VALID="[01]"
 PREF_SWAP_LR_DEFAULT=0
-
-set_pref_vars() {
-  local name=$1
-  PREF_FILE=$(eval echo \$PREF_${name}_FILE)
-  PREF_VALID=$(eval echo \$PREF_${name}_VALID)
-  PREF_DEFAULT=$(eval echo \$PREF_${name}_DEFAULT)
-}
-
-load_pref() {
-  local name="$1"
-  set_pref_vars "$name"
-  local file_size="$(stat -c %s $PREF_FILE)"
-  if [ "$file_size" != "2" ]; then
-    # invalid file size
-    echo "$PREF_DEFAULT"
-    return
-  fi
-  local value="$(cat "$PREF_FILE")"
-  case $value in
-    $PREF_VALID) echo "$value";;
-    *) echo "$PREF_DEFAULT";;
-  esac
-}
-
-store_pref() {
-  local name="$1"
-  local value="$2"
-  set_pref_vars "$name"
-  case $value in
-    $PREF_VALID) ;;
-    *) return;;
-  esac
-  echo $value > "$PREF_FILE"
-}
 
 # We are supposed to set an xinput setting as screen DPI * a muliplier that
 # describes how fast the mouse should be (user preference). This function
