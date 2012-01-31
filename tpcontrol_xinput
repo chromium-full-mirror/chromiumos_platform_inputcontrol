@@ -60,7 +60,7 @@ elif [ "$COMMAND" = "log" -a $# = 1 ] ; then
     # Delete old log files
     delete="$(ls -t ${out_dir}/${out_prefix}* | tail -n '+6')"
     for file in $delete ; do
-      rm "$file"
+      rm -f "$file"
     done
   fi
   VALID=1
