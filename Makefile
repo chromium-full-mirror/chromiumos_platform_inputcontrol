@@ -10,6 +10,7 @@ MOUSE_SCRIPTS=\
 MOUSE_SCRIPTS_DIR=/opt/google/mouse
 
 TP_SCRIPTS=\
+	generate_userfeedback \
 	touchpad_added \
 	tpcontrol \
 	tpcontrol_synclient \

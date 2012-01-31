@@ -1,0 +1,11 @@
+#!/bin/sh
+# Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Dump the logs
+/opt/google/touchpad/tpcontrol log
+
+# Tar up the logs and uuencode them, since feedback needs to text.
+tar cf - $(ls -1t /home/chronos/user/log/touchpad_activity_* | head -n 2 ) | \
+  uuencode -m touchpad_activity_log.tar
