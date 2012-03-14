@@ -93,20 +93,22 @@ find_mice() {
 
 # Returns the xinput ID of the newly attached mouse. If X hasn't loaded a driver
 # for the new mouse, yet, this will not print anything. If found, it prints the
-# xinput ID. The env var DEVPATH must be set (as it is by udev).
+# xinput ID. The env var DEVNAME must be set (as it is by udev).
 get_added_xinput_id() {
-  # Must have $DEVPATH set
-  local phys=$(cat /sys/$DEVPATH/../phys)
+  # Must have $DEVNAME set
+  if [ -z "$DEVNAME" ]; then
+    return
+  fi
   # Get the list of xinput IDs:
   local ids="$($XINPUT list | sed 's/.*id=\([0-9]*\).*/\1/g')"
   if [ -z "$ids" ]; then
     return
   fi
-  for mouse in $ids; do
-    local test_phys=$($XINPUT list-props $mouse | grep "Evdev Physical" | \
+  for id in $ids; do
+    local test_node=$($XINPUT list-props $id | grep "Device Node" | \
                       cut -d '"' -f 2)
-    if [ "$test_phys" = "$phys" ]; then
-      echo $mouse
+    if [ "$test_node" = "$DEVNAME" ]; then
+      echo $id
       return
     fi
   done
