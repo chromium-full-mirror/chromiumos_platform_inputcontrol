@@ -77,16 +77,17 @@ apply_swap_lr() {
 # when a new device is being connected, that new device probably won't show up
 # yet, so this won't apply to it.
 find_mice() {
-  # Search for an xinput entry that contains the "pad" or "Pad"
+  # Search for an xinput entry that contains the "slave pointer"
   # Then, find a field that matches "id=".
   # Lastly, return the part of the field after the '='.
-  local potential_mice="$($XINPUT list | \
+  local slave_pointers="$($XINPUT list | \
     awk '/slave *pointer/ { for (i=1; i<NF; i++) \
     if ($i ~/id=/) print substr($i, 4) }')"
-  for mouse in $potential_mice ; do
-    local match=$($XINPUT list-props $mouse | grep "Evdev" | wc -l)
+  # Next, return only those slave pointers that are using the Evdev driver
+  for pointer in $slave_pointers ; do
+    local match=$($XINPUT list-props $pointer | grep "Evdev" | wc -l)
     if [ "$match" != "0" ]; then
-      echo "$mouse"
+      echo "$pointer"
     fi
   done
 }
@@ -183,7 +184,7 @@ if [ $# = 0 ] ; then
   VALID=0
 elif [ "$COMMAND" = "status" -a $# = 1 ] ; then
   for mouse in $MICE ; do
-    echo Details for mouse ${mouse}:
+    echo "Details for mouse ${mouse}:"
     $XINPUT list-props $mouse
     $XINPUT get-feedbacks $mouse
   done
