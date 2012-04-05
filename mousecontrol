@@ -128,6 +128,24 @@ get_added_xinput_id() {
   done
 }
 
+# We usually use the USB vendor/product ID to identify a device. This doesn't
+# work with devices behind a Logitech Unifying Receiver because the USB vid/pid
+# corresponds to the receiver itself and not the devices behind it. The unifying
+# receiver driver exposes the ID of the device through the device name, so we
+# query xinput to get that, and use that to determine CPI.
+logitech_unifying_receiver_cpi() {
+  local id="$1"
+
+  devstr=$(xinput list-props $id | grep '^Device' | cut -d "'" -f 2)
+  cpi=""
+  unifying_receiver_prefix="Logitech Unifying Device. Wireless PID"
+  case "$devstr" in
+    "${unifying_receiver_prefix}:400e") cpi=400;;  # K400 touchpad
+    "${unifying_receiver_prefix}:*") cpi=1000;;
+  esac
+  echo -n "$cpi"
+}
+
 # Returns the CPI (counts per inch) of the newly attached mouse. Since mice
 # generally don't report CPI, we use the following approach: By default, we
 # assume a CPI of 1000, as this is quite close to most mice on the market today
@@ -146,6 +164,8 @@ get_cpi() {
     "046d:c00f") cpi=385;;  # Logitech MouseMan Traveler/Mobile
     "046d:c016") cpi=377;;  # HP branded "Logitech, Inc. Optical Wheel Mouse"
     "046d:c408") cpi=300;;  # Logitech Trackball*
+    # Unifying receiver is a special case:
+    "046d:c52b") cpi=$(logitech_unifying_receiver_cpi $xinput_id);;
     "047d:1002") cpi=300;;  # Kensington Turbo Mouse Pro (trackball)*
     "047d:1020") cpi=300;;  # Kensington Expert Mouse (trackball)*
     "05ac:"*)    cpi=373;;  # Apple mice
