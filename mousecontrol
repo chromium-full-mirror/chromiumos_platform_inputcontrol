@@ -76,6 +76,16 @@ apply_swap_lr() {
   done
 }
 
+# Applies the correct CPI to the given mice
+apply_cpi() {
+  local mice="$1"
+  for mouse in $mice ; do
+    $XINPUT set-prop $mouse "Device Accel Constant Deceleration" \
+        $(get_cpi $mouse)
+    $XINPUT set-prop $mouse "Device Accel Velocity Scaling" 1
+  done
+}
+
 # Prints out all xinput IDs for all existing attached mice. If this is called
 # when a new device is being connected, that new device probably won't show up
 # yet, so this won't apply to it.
@@ -90,7 +100,7 @@ find_mice() {
   for pointer in $slave_pointers ; do
     local match=$($XINPUT list-props $pointer | grep "Evdev" | wc -l)
     if [ "$match" != "0" ]; then
-      echo "$pointer"
+      echo -n " $pointer"
     fi
   done
 }
@@ -122,13 +132,12 @@ get_added_xinput_id() {
 # generally don't report CPI, we use the following approach: By default, we
 # assume a CPI of 1000, as this is quite close to most mice on the market today
 # (2012 time frame). For mice that we know aren't near 1000, we have a database
-# of CPI values. The env var DEVPATH must be set (as it is by udev).
+# of CPI values.
 get_cpi() {
-  # Must have $DEVPATH set
-  local vendor=$(cat /sys/$DEVPATH/../id/vendor)
-  local product=$(cat /sys/$DEVPATH/../id/product)
+  local xinput_id="$1"
 
-  local vp="${vendor}:${product}"
+  local vp="$(xinput list-props $xinput_id | fgrep "Device Product ID" | \
+              cut -d : -f 2 | sed 's/,//' | xargs printf "%04x:%04x\n")"
 
   # Database of mice that have CPI (DPI) significantly off from 1000.
   local cpi=1000;  # Default CPI
@@ -161,7 +170,7 @@ if [ "$COMMAND" = "add" ]; then
   if [ -z "$newid" ]; then
     return
   fi
-  $XINPUT set-prop $newid "Device Accel Constant Deceleration" $(get_cpi)
+  $XINPUT set-prop $newid "Device Accel Constant Deceleration" $(get_cpi $newid)
   $XINPUT set-prop $newid "Device Accel Velocity Scaling" 1
 
   sens=$(load_pref SENS)
@@ -204,6 +213,7 @@ elif [ "$COMMAND" = "swap_left_right" -a $# = 2 ] ; then
   apply_swap_lr "$value" "$MICE"
   VALID=1
 elif [ "$COMMAND" = "refresh" -a $# = 1 ] ; then
+  apply_cpi "$MICE"
   apply_sensitivity $(load_pref SENS) "$MICE"
   apply_swap_lr $(load_pref SWAP_LR) "$MICE"
   VALID=1
