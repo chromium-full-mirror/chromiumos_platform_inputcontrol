@@ -11,6 +11,7 @@ MOUSE_SCRIPTS_DIR=/opt/google/mouse
 
 TP_SCRIPTS=\
 	generate_userfeedback \
+	send_input_metrics \
 	touchpad_added \
 	tpcontrol \
 	tpcontrol_synclient \
@@ -20,7 +21,11 @@ TP_SCRIPTS_DIR=/opt/google/touchpad
 
 UDEV_RULE=99-inputcontrol.rules
 
-UPSTART_CONF=mouse.conf
+INIT_DIR=/etc/init
+
+UPSTART_CONF=\
+	input-metrics.conf \
+	mouse.conf
 
 DESTDIR = .
 
@@ -34,5 +39,5 @@ install: $(MOUSE_SCRIPTS) $(TP_SCRIPTS) $(UDEV_RULE) $(UPSTART_CONF)
 
 	install -D -m 0644 $(UDEV_RULE) \
 		$(DESTDIR)/lib/udev/rules.d/$(UDEV_RULE)
-	install -D -m 0644 $(UPSTART_CONF) \
-		$(DESTDIR)/etc/init/$(UPSTART_CONF)
+	install -d $(DESTDIR)$(INIT_DIR)
+	install -m 0644 $(UPSTART_CONF) $(DESTDIR)$(INIT_DIR)

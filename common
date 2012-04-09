@@ -3,6 +3,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# TODO(josephsih): need to have some way to derive this list
+# from system attributes automatically.
+DEVICES_WITHOUT_BUILT_IN_TOUCHPAD="stumpy"
+
 set_pref_vars() {
   local name=$1
   PREF_FILE=$(eval echo \$PREF_${name}_FILE)
@@ -37,3 +41,10 @@ store_pref() {
   echo $value > "$PREF_FILE"
 }
 
+find_pad() {
+  # Use xinput to find if any touchpad device is present. Then find its
+  # device ID number.
+  return `xinput list | \
+    awk '/[pP]ad|cyapa/ { for (i=1; i<NF; i++) \
+         if ($i ~/id=/) print substr($i, 4) }'`
+}
