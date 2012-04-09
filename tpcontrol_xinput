@@ -30,15 +30,6 @@ usage() {
     "set <property> <value>|add}"
 }
 
-find_pad() {
-  # Search for an xinput entry that contains the "pad" or "Pad"
-  # Then, find a field that matches "id=".
-  # Lastly, return the part of the field after the '='.
-  return `xinput list | \
-    awk '/[pP]ad|cyapa/ { for (i=1; i<NF; i++) \
-         if ($i ~/id=/) print substr($i, 4) }'`
-}
-
 find_pad
 DEVICE=$?
 VALID=0
