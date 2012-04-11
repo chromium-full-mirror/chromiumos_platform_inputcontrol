@@ -50,18 +50,24 @@ elif [ "$COMMAND" = "status" -a $# = 1 ] ; then
   VALID=1
 elif [ "$COMMAND" = "log" -a $# = 1 ] ; then
   $XINPUT set-prop $DEVICE "Logging Notify" 1
+  $XINPUT set-prop $DEVICE "Dump Debug Log" 1
   sleep 0.5
   now=$(date '+%Y%m%d-%H%M%S')
   raw_file=/var/log/touchpad_activity_log.txt
   out_dir=/home/chronos/user/log
   out_prefix=touchpad_activity_
   out_file="${out_dir}/${out_prefix}${now}"
+  cmt_log_file=/var/log/cmt_input_events.dat
+  cmt_out_prefix=cmt_input_events_
+  cmt_out_file="${out_dir}/${cmt_out_prefix}${now}"
   if [ ! -d $out_dir ]; then
     echo "User not logged in, so not moving log to user dir"
   else
     gzip -c --stdout "$raw_file" > "$out_file"
+    gzip -c --stdout "$cmt_log_file" > "$cmt_out_file"
     # Delete old log files
     delete="$(ls -t ${out_dir}/${out_prefix}* | tail -n '+6')"
+    delete="${delete} $(ls -t ${out_dir}/${cmt_out_prefix}* | tail -n '+6')"
     for file in $delete ; do
       rm -f "$file"
     done
