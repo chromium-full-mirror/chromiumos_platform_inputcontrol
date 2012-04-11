@@ -26,7 +26,7 @@ PREF_SWAP_LR_FILE=/home/chronos/user/mouse_swap_lr_buttons
 PREF_SWAP_LR_VALID="[01]"
 PREF_SWAP_LR_DEFAULT=0
 
-# We are supposed to set an xinput setting as screen DPI * a muliplier that
+# We are supposed to set an xinput setting as screen DPI * a multiplier that
 # describes how fast the mouse should be (user preference). This function
 # returns that product.
 # We use multipliers of: 1, 1.4, 1.8, 2, 2.2. The low three have a slope that
@@ -37,7 +37,7 @@ thresh_and_dpi_times_sensitivity_multiplier() {
   local sens=$1  # 1..5
   case $sens in
     1) echo 500 $SCREEN_DPI;;
-    4) echo 500 $(((SCREEN_DPI * 7) / 5));;
+    2) echo 500 $(((SCREEN_DPI * 7) / 5));;
     3) echo 500 $(((SCREEN_DPI * 9) / 5));;
     4) echo   0 $((SCREEN_DPI * 2));;
     5) echo   0 $(((SCREEN_DPI * 11) / 5));;
