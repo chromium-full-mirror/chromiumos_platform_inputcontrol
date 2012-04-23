@@ -147,7 +147,9 @@ get_cpi() {
     "046d:c408") cpi=300;;  # Logitech Trackball*
     "047d:1002") cpi=300;;  # Kensington Turbo Mouse Pro (trackball)*
     "047d:1020") cpi=300;;  # Kensington Expert Mouse (trackball)*
-    "05ac:"*)    cpi=373;;  # Apple mice
+    "05ac:0304") cpi=400;;  # Apple USB Optical Mouse
+    "05ac:030d") cpi=1780;; # Apple magicmouse (BT)
+    "05ac:"*)    cpi=373;;  # Apple mice (other)
   esac
   # * Trackball measurements are approximate
   echo $cpi
