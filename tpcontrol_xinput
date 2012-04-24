@@ -23,11 +23,47 @@ PREF_SENS_DEFAULT=3
 PREF_TAP_FILE=/home/chronos/user/touchpad_tap_enable
 PREF_TAP_VALID="[01]"
 PREF_TAP_DEFAULT=0
+PREF_3FCLICK_FILE=/home/chronos/user/touchpad_3f_click_enable
+PREF_3FCLICK_VALID="[01]"
+PREF_3FCLICK_DEFAULT=0
+PREF_T5R2_3FCLICK_FILE=/home/chronos/user/touchpad_t5r2_3f_click_enable
+PREF_T5R2_3FCLICK_VALID="[01]"
+PREF_T5R2_3FCLICK_DEFAULT=0
 
 usage() {
   echo "Usage:"\
     "$PROG {status|log|taptoclick [on|off]|sensitivity [1-5]|"\
+    "three_finger_click [on|off]|t5r2_three_finger_click [on|off]|"\
     "set <property> <value>|add}"
+}
+
+# echos "0" (off) or "1" (on) on success, or nothing on failure.
+parse_bool() {
+  local value="$1"
+  case $value in
+  "on"|"1")
+    echo "1"
+    ;;
+  "off"|"0")
+    echo "0"
+    ;;
+  esac
+}
+
+# Sets VALID to 1 (valid input) or 0 (invalid input)
+apply_on_off_prop() {
+  local prop_name="$1"
+  local value="$2"
+  local pref_name="$3"
+
+  local num_val=$(parse_bool "$value")
+  if [ -n "$num_val" ]; then
+    $XINPUT set-prop $DEVICE "$prop_name" "$num_val"
+    store_pref "$pref_name" "$num_val"
+    VALID=1
+  else
+    VALID=0
+  fi
 }
 
 find_pad
@@ -66,25 +102,18 @@ elif [ "$COMMAND" = "log" -a $# = 1 ] ; then
   VALID=1
 elif [ "$COMMAND" = "taptoclick" -a $# = 2 ] ; then
   VALUE=$2
-  case $VALUE in
-  "on")
-    NUM_VAL="1"
-    VALID=1
-    ;;
-  "off")
-    NUM_VAL="0"
-    VALID=1
-    ;;
-  esac
-  if [ "$VALID" != "0" ]; then
-    $XINPUT set-prop $DEVICE "Tap Enable" "$NUM_VAL"
-    store_pref TAP "$NUM_VAL"
-  fi
+  apply_on_off_prop "Tap Enable" "$VALUE" "TAP"
 elif [ "$COMMAND" = "sensitivity" -a $# = 2 ] ; then
   VALUE=$2
   $XINPUT set-prop $DEVICE "Sensitivity" "$VALUE"
   store_pref SENS "$VALUE"
   VALID=1
+elif [ "$COMMAND" = "three_finger_click" -a $# = 2 ] ; then
+  VALUE=$2
+  apply_on_off_prop "Three Finger Click Enable" "$VALUE" "3FCLICK"
+elif [ "$COMMAND" = "t5r2_three_finger_click" -a $# = 2 ] ; then
+  VALUE=$2
+  apply_on_off_prop "T5R2 Three Finger Click Enable" "$VALUE" "T5R2_3FCLICK"
 elif [ "$COMMAND" = "set" -a $# = 3 ] ; then
   PROP=$2
   VALUE=$3
@@ -97,10 +126,11 @@ elif [ "$COMMAND" = "add" -a $# = 1 ] ; then
     sleep 2
     DEVICE="$(find_pad)"
   fi
-  TAP_VAL=$(load_pref TAP)
-  SENS_VAL=$(load_pref SENS)
-  $XINPUT set-prop $DEVICE "Sensitivity" "$SENS_VAL"
-  $XINPUT set-prop $DEVICE "Tap Enable" "$TAP_VAL"
+  $XINPUT set-prop $DEVICE "Sensitivity" "$(load_pref SENS)"
+  $XINPUT set-prop $DEVICE "Tap Enable" "$(load_pref TAP)"
+  $XINPUT set-prop $DEVICE "Three Finger Click Enable" "$(load_pref 3FCLICK)"
+  $XINPUT set-prop $DEVICE "T5R2 Three Finger Click Enable" \
+      "$(load_pref T5R2_3FCLICK)"
   VALID=1
 fi
 
