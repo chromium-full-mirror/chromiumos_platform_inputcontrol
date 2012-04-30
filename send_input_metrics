@@ -70,4 +70,5 @@ is_touchpad_found() {
 
 # Report the existence of touchpad device
 is_touchpad_found
+echo $DEVICE > /tmp/input_device_state
 metrics_client Touchpad.Device $DEVICE $DEVICE_MIN $DEVICE_MAX $DEVICE_COUNT
