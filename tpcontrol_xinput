@@ -34,7 +34,7 @@ usage() {
   echo "Usage:"\
     "$PROG {status|log|taptoclick [on|off]|sensitivity [1-5]|"\
     "three_finger_click [on|off]|t5r2_three_finger_click [on|off]|"\
-    "set <property> <value>|add}"
+    "set <property> <value>|add|listdev}"
 }
 
 # echos "0" (off) or "1" (on) on success, or nothing on failure.
@@ -131,6 +131,10 @@ elif [ "$COMMAND" = "add" -a $# = 1 ] ; then
   $XINPUT set-prop $DEVICE "Three Finger Click Enable" "$(load_pref 3FCLICK)"
   $XINPUT set-prop $DEVICE "T5R2 Three Finger Click Enable" \
       "$(load_pref T5R2_3FCLICK)"
+  VALID=1
+elif [ "$COMMAND" = "listdev" -a $# = 1 ] ; then
+  find_pad
+  echo $?
   VALID=1
 fi
 
