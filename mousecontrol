@@ -164,11 +164,18 @@ get_cpi() {
     "046d:c00f") cpi=385;;  # Logitech MouseMan Traveler/Mobile
     "046d:c016") cpi=377;;  # HP branded "Logitech, Inc. Optical Wheel Mouse"
     "046d:c018") cpi=377;;  # "Logitech, Inc. Optical Wheel Mouse" model M-UAE96
-    "046d:c408") cpi=300;;  # Logitech Trackball*
+    # According to http://www.linux-usb.org/usb.ids , these are 4 trackballs:
+    "046d:c40"*) cpi=300;;  # Logitech Trackballs*
+    "046d:c508") cpi=300;;  # Cordless Trackball
     # Unifying receiver is a special case:
     "046d:c52b") cpi=$(logitech_unifying_receiver_cpi $xinput_id);;
     "047d:1002") cpi=300;;  # Kensington Turbo Mouse Pro (trackball)*
+    "047d:1003") cpi=300;;  # Kensington Orbit TrackBall (trackball)*
+    "047d:1005") cpi=300;;  # Kensington TurboBall (trackball)*
+    "047d:1006") cpi=300;;  # Kensington TurboRing (trackball)*
+    "047d:1009") cpi=300;;  # Kensington Orbit TrackBall for Mac (trackball)*
     "047d:1020") cpi=300;;  # Kensington Expert Mouse (trackball)*
+    "047d:2041") cpi=300;;  # Kensington SlimBlade Trackball (trackball)*
     "05ac:0304") cpi=400;;  # Apple USB Optical Mouse
     "05ac:030d") cpi=1780;; # Apple magicmouse (BT)
     "05ac:"*)    cpi=373;;  # Apple mice (other)
