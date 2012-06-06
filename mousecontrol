@@ -76,6 +76,31 @@ apply_swap_lr() {
   done
 }
 
+vendor_product_for_xinput_id() {
+  local xinput_id="$1"
+
+  local vp="$(xinput list-props $xinput_id | fgrep "Device Product ID" | \
+              cut -d : -f 2 | sed 's/,//' | xargs printf "%04x:%04x\n")"
+  echo "$vp"
+}
+
+# Remaps buttons for a device
+apply_button_remap() {
+  local xinput_ids="$1"
+
+  for xinput_id in $xinput_ids ; do
+    local vp="$(vendor_product_for_xinput_id $xinput_id)"
+    case $vp in
+      "05ac:0304")  # Apple USB Mighty Mouse: Disable side button
+        $XINPUT get-button-map $xinput_id | awk \
+            '{ for (i=1; i <= NF; i++) { \
+                 if (i == 8) { printf 0 } else { printf $(i) }; printf " " \
+               } } END{ print "" }' | \
+            xargs $XINPUT set-button-map $xinput_id;;
+    esac
+  done
+}
+
 # Applies the correct CPI to the given mice
 apply_cpi() {
   local mice="$1"
@@ -154,8 +179,7 @@ logitech_unifying_receiver_cpi() {
 get_cpi() {
   local xinput_id="$1"
 
-  local vp="$(xinput list-props $xinput_id | fgrep "Device Product ID" | \
-              cut -d : -f 2 | sed 's/,//' | xargs printf "%04x:%04x\n")"
+  local vp="$(vendor_product_for_xinput_id $xinput_id)"
 
   # Database of mice that have CPI (DPI) significantly off from 1000.
   local cpi=1000;  # Default CPI
@@ -209,6 +233,7 @@ if [ "$COMMAND" = "add" ]; then
   apply_sensitivity $sens "$newid"
   swap_lr=$(load_pref SWAP_LR)
   apply_swap_lr $swap_lr "$newid"
+  apply_button_remap "$newid"
 
   exit 0
 fi
@@ -246,6 +271,7 @@ elif [ "$COMMAND" = "swap_left_right" -a $# = 2 ] ; then
   VALID=1
 elif [ "$COMMAND" = "refresh" -a $# = 1 ] ; then
   apply_cpi "$MICE"
+  apply_button_remap "$MICE"
   apply_sensitivity $(load_pref SENS) "$MICE"
   apply_swap_lr $(load_pref SWAP_LR) "$MICE"
   VALID=1
