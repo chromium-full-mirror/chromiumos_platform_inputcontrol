@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2010 The Chromium OS Authors. All rights reserved.
+# Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -32,7 +32,7 @@ PREF_T5R2_3FCLICK_DEFAULT=0
 
 usage() {
   echo "Usage:"\
-    "$PROG {status|log|taptoclick [on|off]|sensitivity [1-5]|"\
+    "$PROG {status|log ['alt']|taptoclick [on|off]|sensitivity [1-5]|"\
     "three_finger_click [on|off]|t5r2_three_finger_click [on|off]|"\
     "set <property> <value>|add|listdev}"
 }
@@ -75,13 +75,16 @@ if [ $# = 0 ] ; then
 elif [ "$COMMAND" = "status" -a $# = 1 ] ; then
   $XINPUT list-props $DEVICE
   VALID=1
-elif [ "$COMMAND" = "log" -a $# = 1 ] ; then
+elif [ "$COMMAND" = "log" -a $# = 1 -o $# = 2 ] ; then
   $XINPUT set-prop $DEVICE "Logging Notify" 1
   $XINPUT set-prop $DEVICE "Dump Debug Log" 1
   sleep 0.5
   now=$(date '+%Y%m%d-%H%M%S')
   raw_file=/var/log/touchpad_activity_log.txt
   out_dir=/home/chronos/user/log
+  if [ "$2" = "alt" ]; then
+    out_dir=/debugd/touchpad
+  fi
   out_prefix=touchpad_activity_
   out_file="${out_dir}/${out_prefix}${now}"
   cmt_log_file=/var/log/cmt_input_events.dat
