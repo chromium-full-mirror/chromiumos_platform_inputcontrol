@@ -75,7 +75,7 @@ if [ $# = 0 ] ; then
 elif [ "$COMMAND" = "status" -a $# = 1 ] ; then
   $XINPUT list-props $DEVICE
   VALID=1
-elif [ "$COMMAND" = "log" -a $# = 1 -o $# = 2 ] ; then
+elif [ "$COMMAND" = "log" -a \( $# = 1 -o $# = 2 \) ] ; then
   $XINPUT set-prop $DEVICE "Logging Notify" 1
   $XINPUT set-prop $DEVICE "Dump Debug Log" 1
   sleep 0.5
