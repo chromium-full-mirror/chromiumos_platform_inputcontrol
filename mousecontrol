@@ -183,7 +183,9 @@ get_cpi() {
 
   # Database of mice that have CPI (DPI) significantly off from 1000.
   local cpi=1000;  # Default CPI
+  local trackpoint_cpi=400;  # Approximate, since CPI doesn't exactly apply
   case $vp in
+    "0002:000a") cpi=$trackpoint_cpi;;  # PS/2 IBM Trackpoint
     "0461:4d22") cpi=474;;  # Standard Dell
     "046d:c00f") cpi=385;;  # Logitech MouseMan Traveler/Mobile
     "046d:c016") cpi=377;;  # HP branded "Logitech, Inc. Optical Wheel Mouse"
@@ -204,6 +206,7 @@ get_cpi() {
     "05ac:0304") cpi=400;;  # Apple USB Optical Mouse
     "05ac:030d") cpi=1780;; # Apple magicmouse (BT)
     "05ac:"*)    cpi=373;;  # Apple mice (other)
+    "06cb:0009") cpi=$trackpoint_cpi;;  # USB IBM Trackpoint
     "1532:0016") cpi=1714;; # Razer USA, Ltd DeathAdder RZ01-0015
     "413c:3012") cpi=502;;  # Dell Computer Corp. Optical Wheel Mouse
   esac
