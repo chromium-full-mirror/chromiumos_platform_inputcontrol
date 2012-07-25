@@ -207,10 +207,11 @@ get_cpi() {
     "05ac:030d") cpi=1780;; # Apple magicmouse (BT)
     "05ac:"*)    cpi=373;;  # Apple mice (other)
     "06cb:0009") cpi=$trackpoint_cpi;;  # USB IBM Trackpoint
+    "0c45:7000") cpi=400;;  # FAVI Entertainment Wireless Keyboard (TouchPad)*
     "1532:0016") cpi=1714;; # Razer USA, Ltd DeathAdder RZ01-0015
     "413c:3012") cpi=502;;  # Dell Computer Corp. Optical Wheel Mouse
   esac
-  # * Trackball measurements are approximate
+  # * Trackball/touchpad measurements are approximate
   echo $cpi
 }
 
