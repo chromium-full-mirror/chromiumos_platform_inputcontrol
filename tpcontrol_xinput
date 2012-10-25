@@ -29,11 +29,15 @@ PREF_3FCLICK_DEFAULT=0
 PREF_T5R2_3FCLICK_FILE=/home/chronos/user/touchpad_t5r2_3f_click_enable
 PREF_T5R2_3FCLICK_VALID="[01]"
 PREF_T5R2_3FCLICK_DEFAULT=0
+PREF_3FSWIPE_FILE=/home/chronos/user/touchpad_3f_swipe_enable
+PREF_3FSWIPE_VALID="[01]"
+PREF_3FSWIPE_DEFAULT=0
 
 usage() {
   echo "Usage:"\
     "$PROG {status|log ['alt']|taptoclick [on|off]|sensitivity [1-5]|"\
     "three_finger_click [on|off]|t5r2_three_finger_click [on|off]|"\
+    "three_finger_swipe_enable [on|off]|"\
     "set <property> <value>|add|listdev}"
 }
 
@@ -117,6 +121,9 @@ elif [ "$COMMAND" = "three_finger_click" -a $# = 2 ] ; then
 elif [ "$COMMAND" = "t5r2_three_finger_click" -a $# = 2 ] ; then
   VALUE=$2
   apply_on_off_prop "T5R2 Three Finger Click Enable" "$VALUE" "T5R2_3FCLICK"
+elif [ "$COMMAND" = "three_finger_swipe_enable" -a $# = 2 ] ; then
+  VALUE=$2
+  apply_on_off_prop "Three Finger Swipe Enable" "$VALUE" "3FSWIPE"
 elif [ "$COMMAND" = "set" -a $# = 3 ] ; then
   PROP=$2
   VALUE=$3
@@ -134,6 +141,8 @@ elif [ "$COMMAND" = "add" -a $# = 1 ] ; then
   $XINPUT set-prop $DEVICE "Three Finger Click Enable" "$(load_pref 3FCLICK)"
   $XINPUT set-prop $DEVICE "T5R2 Three Finger Click Enable" \
       "$(load_pref T5R2_3FCLICK)"
+  $XINPUT set-prop $DEVICE "Three Finger Swipe Enable" \
+      "$(load_pref 3FSWIPE)"
   VALID=1
 elif [ "$COMMAND" = "listdev" -a $# = 1 ] ; then
   find_pad
