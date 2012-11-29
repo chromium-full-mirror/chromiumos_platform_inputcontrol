@@ -189,7 +189,7 @@ get_cpi() {
     "0461:4d22") cpi=474;;  # Standard Dell
     "046d:c00f") cpi=385;;  # Logitech MouseMan Traveler/Mobile
     "046d:c016") cpi=377;;  # HP branded "Logitech, Inc. Optical Wheel Mouse"
-    "046d:c018") cpi=377;;  # "Logitech, Inc. Optical Wheel Mouse" model M-UAE96
+    "046d:c018") cpi=530;;  # "Logitech, Inc. Optical Wheel Mouse" model M-UAE96
     "046d:c03e") cpi=464;;  # Logitech Premium Optical Wheel Mouse (M-BT58)
     # According to http://www.linux-usb.org/usb.ids , these are 4 trackballs:
     "046d:c40"*) cpi=300;;  # Logitech Trackballs*
