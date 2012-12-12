@@ -76,11 +76,31 @@ apply_swap_lr() {
   done
 }
 
+canonical_ids() {
+  # In case minus number is passed, truncate it to the last 4 hexdigits.
+  # e.g., -16360 -> ffffffffffffc018 -> c018
+  local id_strings id_str first
+  read id_strings
+  for id_str in $id_strings; do
+    if [ -n "$first" ]; then
+      printf ":"
+    fi
+    printf "%04x" "$id_str" | sed 's/.*\(.\{4\}\)$/\1/'
+    first="not"
+  done
+}
+
 vendor_product_for_xinput_id() {
   local xinput_id="$1"
 
   local vp="$(xinput list-props $xinput_id | fgrep "Device Product ID" | \
-              cut -d : -f 2 | sed 's/,//' | xargs printf "%04x:%04x\n")"
+              cut -d : -f 2 | sed 's/,//' | canonical_ids)"
+  if ! echo "${vp}" | grep -q ':'; then
+    vp="$(xinput list-props $xinput_id | fgrep "Device Vendor ID" | \
+          cut -d : -f 2 | canonical_ids)"
+    vp="${vp}:$(xinput list-props $xinput_id | fgrep "Device Product ID" | \
+                cut -d : -f 2 | canonical_ids)"
+  fi
   echo "$vp"
 }
 
@@ -217,6 +237,16 @@ get_cpi() {
   echo $cpi
 }
 
+# Kernel's Apple magicmouse driver by default will interpret mouse events, and
+# we would like to turn off this interpretation.
+fixup_apple_magicmouse_driver_parameters() {
+  if [ "$(vendor_product_for_xinput_id $1)" != "05ac:030d" ]; then
+    return
+  fi
+  echo 0 > /sys/module/hid_magicmouse/parameters/emulate_3button
+  echo 0 > /sys/module/hid_magicmouse/parameters/emulate_scroll_wheel
+}
+
 # Add is a special command that's run possibly before xinput detects the mice.
 # It's run from udev. We handle this here, rather than below, since a newly
 # plugged device may not show up in xinput yet.
@@ -241,6 +271,8 @@ if [ "$COMMAND" = "add" ]; then
   swap_lr=$(load_pref SWAP_LR)
   apply_swap_lr $swap_lr "$newid"
   apply_button_remap "$newid"
+
+  fixup_apple_magicmouse_driver_parameters "$newid"
 
   exit 0
 fi
