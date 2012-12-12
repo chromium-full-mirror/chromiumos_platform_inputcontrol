@@ -32,10 +32,14 @@ PREF_T5R2_3FCLICK_DEFAULT=0
 PREF_3FSWIPE_FILE=/home/chronos/user/touchpad_3f_swipe_enable
 PREF_3FSWIPE_VALID="[01]"
 PREF_3FSWIPE_DEFAULT=0
+PREF_TAPDRAG_FILE=/home/chronos/user/touchpad_tap_drag_enable
+PREF_TAPDRAG_VALID="[01]"
+PREF_TAPDRAG_DEFAULT=0
 
 usage() {
   echo "Usage:"\
-    "$PROG {status|log ['alt']|taptoclick [on|off]|sensitivity [1-5]|"\
+    "$PROG {status|log ['alt']|tap_dragging [on|off]|"\
+    "taptoclick [on|off]|sensitivity [1-5]|"\
     "three_finger_click [on|off]|t5r2_three_finger_click [on|off]|"\
     "three_finger_swipe [on|off]|"\
     "set <property> <value>|add|listdev}"
@@ -107,6 +111,9 @@ elif [ "$COMMAND" = "log" -a \( $# = 1 -o $# = 2 \) ] ; then
     done
   fi
   VALID=1
+elif [ "$COMMAND" = "tap_dragging" -a $# = 2 ] ; then
+  VALUE=$2
+  apply_on_off_prop "Tap Drag Enable" "$VALUE" "TAPDRAG"
 elif [ "$COMMAND" = "taptoclick" -a $# = 2 ] ; then
   VALUE=$2
   apply_on_off_prop "Tap Enable" "$VALUE" "TAP"
@@ -137,6 +144,7 @@ elif [ "$COMMAND" = "add" -a $# = 1 ] ; then
     DEVICE="$(find_pad)"
   fi
   $XINPUT set-prop $DEVICE "Sensitivity" "$(load_pref SENS)"
+  $XINPUT set-prop $DEVICE "Tap Drag Enable" "$(load_pref TAPDRAG)"
   $XINPUT set-prop $DEVICE "Tap Enable" "$(load_pref TAP)"
   $XINPUT set-prop $DEVICE "Three Finger Click Enable" "$(load_pref 3FCLICK)"
   $XINPUT set-prop $DEVICE "T5R2 Three Finger Click Enable" \
