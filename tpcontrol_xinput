@@ -36,6 +36,22 @@ PREF_TAPDRAG_FILE=/home/chronos/user/touchpad_tap_drag_enable
 PREF_TAPDRAG_VALID="[01]"
 PREF_TAPDRAG_DEFAULT=0
 
+# For tpcontrol firmware trials
+TP_FIRMWARE_TRIAL_SELECTION_FILE=/var/cache/touch_trial/selection
+TP_FIRMWARE_TRIAL_CHOICES_FILE=/opt/google/touchpad/firmware/choices
+
+print_firmware_selection() {
+  selected=$(cat "${TP_FIRMWARE_TRIAL_SELECTION_FILE}")
+  while read CHOICE; do
+    if [ "${selected}" = "${CHOICE}" ]; then
+      printf "[${CHOICE}] "
+    else
+      printf "${CHOICE} "
+    fi
+  done < "${TP_FIRMWARE_TRIAL_CHOICES_FILE}"
+  printf "\n"
+}
+
 usage() {
   echo "Usage:"\
     "$PROG {status|log ['alt']|tap_dragging [on|off]|"\
@@ -135,6 +151,37 @@ elif [ "$COMMAND" = "set" -a $# = 3 ] ; then
   PROP=$2
   VALUE=$3
   $XINPUT set-prop $DEVICE "$PROP" "$VALUE"
+  VALID=1
+elif [ "$COMMAND" = "firmware" -a $# = 1 ]; then
+  if [ -e "${TP_FIRMWARE_TRIAL_SELECTION_FILE}" ] &&
+     [ -e "${TP_FIRMWARE_TRIAL_CHOICES_FILE}" ]; then
+    # List firmwares available for trial
+    print_firmware_selection
+  else
+    echo "Touchpad trial firmwares not supported."
+  fi
+  VALID=1
+elif [ "$COMMAND" = "firmware" -a $# = 2 ]; then
+  VALUE=$2
+  if [ -e "${TP_FIRMWARE_TRIAL_SELECTION_FILE}" ] &&
+     [ -e "${TP_FIRMWARE_TRIAL_CHOICES_FILE}" ]; then
+    FOUND=0
+    while read CHOICE; do
+      if [ "${VALUE}" = "${CHOICE}" ]; then
+        FOUND=1
+        break
+      fi
+    done < "${TP_FIRMWARE_TRIAL_CHOICES_FILE}"
+    if [ ${FOUND} -eq 1 ]; then
+      printf "${VALUE}" > "${TP_FIRMWARE_TRIAL_SELECTION_FILE}"
+      echo "Selected ${VALUE} as touchpad trial firmware. Reboot to apply."
+    else
+      echo "Please select one of these :"
+      print_firmware_selection
+    fi
+  else
+    echo "Touchpad trial firmwares not supported."
+  fi
   VALID=1
 elif [ "$COMMAND" = "add" -a $# = 1 ] ; then
   # New device. Set sensitivity/tap enable
