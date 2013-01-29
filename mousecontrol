@@ -272,8 +272,6 @@ if [ "$COMMAND" = "add" ]; then
   apply_swap_lr $swap_lr "$newid"
   apply_button_remap "$newid"
 
-  fixup_apple_magicmouse_driver_parameters "$newid"
-
   exit 0
 fi
 
