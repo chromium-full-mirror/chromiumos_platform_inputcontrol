@@ -186,7 +186,7 @@ logitech_unifying_receiver_cpi() {
   unifying_receiver_prefix="Logitech Unifying Device. Wireless PID"
   case "$devstr" in
     "${unifying_receiver_prefix}:400e") cpi=400;;  # K400 touchpad
-    "${unifying_receiver_prefix}:1028") cpi=300;;  # M570 trackball
+    "${unifying_receiver_prefix}:1028") cpi=600;;  # M570 trackball
     "${unifying_receiver_prefix}:"*) cpi=1000;;
   esac
   echo -n "$cpi"
