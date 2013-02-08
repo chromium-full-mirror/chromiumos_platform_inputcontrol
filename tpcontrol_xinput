@@ -82,7 +82,9 @@ apply_on_off_prop() {
 
   local num_val=$(parse_bool "$value")
   if [ -n "$num_val" ]; then
-    $XINPUT set-prop $DEVICE "$prop_name" "$num_val"
+    for DEVICE in $DEVICES ; do
+      $XINPUT set-prop $DEVICE "$prop_name" "$num_val"
+    done
     store_pref "$pref_name" "$num_val"
     VALID=1
   else
@@ -90,42 +92,47 @@ apply_on_off_prop() {
   fi
 }
 
-find_pad
-DEVICE=$?
+
+DEVICES="$(find_pad)"
 VALID=0
 
 if [ $# = 0 ] ; then
   VALID=0
 elif [ "$COMMAND" = "status" -a $# = 1 ] ; then
-  $XINPUT list-props $DEVICE
+  for DEVICE in $DEVICES ; do
+    echo DEVICE: $DEVICE
+    $XINPUT list-props $DEVICE
+  done
   VALID=1
 elif [ "$COMMAND" = "log" -a \( $# = 1 -o $# = 2 \) ] ; then
-  $XINPUT set-prop $DEVICE "Logging Notify" 1
-  $XINPUT set-prop $DEVICE "Dump Debug Log" 1
-  sleep 0.5
   now=$(date '+%Y%m%d-%H%M%S')
-  raw_file=/var/log/touchpad_activity_log.txt
-  out_dir=/home/chronos/user/log
-  if [ "$2" = "alt" ]; then
-    out_dir=/debugd/touchpad
-  fi
-  out_prefix=touchpad_activity_
-  out_file="${out_dir}/${out_prefix}${now}"
-  cmt_log_file=/var/log/cmt_input_events.dat
-  cmt_out_prefix=cmt_input_events_
-  cmt_out_file="${out_dir}/${cmt_out_prefix}${now}"
-  if [ ! -d $out_dir ]; then
-    echo "User not logged in, so not moving log to user dir"
-  else
-    gzip -c --stdout "$raw_file" > "$out_file"
-    gzip -c --stdout "$cmt_log_file" > "$cmt_out_file"
-    # Delete old log files
-    delete="$(ls -t ${out_dir}/${out_prefix}* | tail -n '+6')"
-    delete="${delete} $(ls -t ${out_dir}/${cmt_out_prefix}* | tail -n '+6')"
-    for file in $delete ; do
-      rm -f "$file"
-    done
-  fi
+  for DEVICE in $DEVICES ; do
+    $XINPUT set-prop $DEVICE "Logging Notify" 1
+    $XINPUT set-prop $DEVICE "Dump Debug Log" 1
+    sleep 0.5
+    raw_file=/var/log/touchpad_activity_log.txt
+    out_dir=/home/chronos/user/log
+    if [ "$2" = "alt" ]; then
+      out_dir=/debugd/touchpad
+    fi
+    out_prefix=touchpad_activity_
+    out_file="${out_dir}/${out_prefix}${now}.$DEVICE"
+    cmt_log_file=/var/log/cmt_input_events.dat
+    cmt_out_prefix=cmt_input_events_
+    cmt_out_file="${out_dir}/${cmt_out_prefix}${now}.$DEVICE"
+    if [ ! -d $out_dir ]; then
+      echo "User not logged in, so not moving log to user dir"
+    else
+      gzip -c --stdout "$raw_file" > "$out_file"
+      gzip -c --stdout "$cmt_log_file" > "$cmt_out_file"
+      # Delete old log files
+      delete="$(ls -t ${out_dir}/${out_prefix}* | tail -n '+6')"
+      delete="${delete} $(ls -t ${out_dir}/${cmt_out_prefix}* | tail -n '+6')"
+      for file in $delete ; do
+        rm -f "$file"
+      done
+    fi
+  done
   VALID=1
 elif [ "$COMMAND" = "tap_dragging" -a $# = 2 ] ; then
   VALUE=$2
@@ -135,7 +142,9 @@ elif [ "$COMMAND" = "taptoclick" -a $# = 2 ] ; then
   apply_on_off_prop "Tap Enable" "$VALUE" "TAP"
 elif [ "$COMMAND" = "sensitivity" -a $# = 2 ] ; then
   VALUE=$2
-  $XINPUT set-prop $DEVICE "Sensitivity" "$VALUE"
+  for DEVICE in $DEVICES ; do
+    $XINPUT set-prop $DEVICE "Sensitivity" "$VALUE"
+  done
   store_pref SENS "$VALUE"
   VALID=1
 elif [ "$COMMAND" = "three_finger_click" -a $# = 2 ] ; then
@@ -150,7 +159,9 @@ elif [ "$COMMAND" = "three_finger_swipe" -a $# = 2 ] ; then
 elif [ "$COMMAND" = "set" -a $# = 3 ] ; then
   PROP=$2
   VALUE=$3
-  $XINPUT set-prop $DEVICE "$PROP" "$VALUE"
+  for DEVICE in $DEVICES ; do
+    $XINPUT set-prop $DEVICE "$PROP" "$VALUE"
+  done
   VALID=1
 elif [ "$COMMAND" = "firmware" -a $# = 1 ]; then
   if [ -e "${TP_FIRMWARE_TRIAL_SELECTION_FILE}" ] &&
@@ -186,9 +197,9 @@ elif [ "$COMMAND" = "firmware" -a $# = 2 ]; then
 elif [ "$COMMAND" = "add" -a $# = 1 ] ; then
   # New device. Set sensitivity/tap enable
   # Give some time for device to arrive, if necessary
+  DEVICE=$(wait_and_get_added_xinput_id)
   if [ -z "$DEVICE" ]; then
-    sleep 2
-    DEVICE="$(find_pad)"
+    logger New touchpad device not found with xinput: $DEVNAME
   fi
   $XINPUT set-prop $DEVICE "Sensitivity" "$(load_pref SENS)"
   $XINPUT set-prop $DEVICE "Tap Drag Enable" "$(load_pref TAPDRAG)"
@@ -201,7 +212,6 @@ elif [ "$COMMAND" = "add" -a $# = 1 ] ; then
   VALID=1
 elif [ "$COMMAND" = "listdev" -a $# = 1 ] ; then
   find_pad
-  echo $?
   VALID=1
 fi
 

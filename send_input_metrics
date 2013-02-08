@@ -56,9 +56,8 @@ DEVICE_COUNT=$(($DEVICE_MAX - $DEVICE_MIN + 1))
 # Probe the touchpad status.
 is_touchpad_found() {
   if is_touchpad_builtin; then
-    find_pad
-    DEVICE=$?
-    if [ $DEVICE -gt 0 ]; then
+    DEVICE="$(find_pad)"
+    if [ -n "$DEVICE" ]; then
       DEVICE=$TP_PRESENT_TP_EXPECTED_BOOT
     else
       DEVICE=$NO_TP_PRESENT_TP_EXPECTED_BOOT

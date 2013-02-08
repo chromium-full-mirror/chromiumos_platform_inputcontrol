@@ -44,7 +44,43 @@ store_pref() {
 find_pad() {
   # Use xinput to find if any touchpad device is present. Then find its
   # device ID number.
-  return `xinput list | \
+  xinput list | \
     awk '/[pP]ad|cyapa/ { for (i=1; i<NF; i++) \
-         if ($i ~/id=/) print substr($i, 4) }'`
+         if ($i ~/id=/) print substr($i, 4) }'
+}
+
+# Returns the xinput ID of the newly attached mouse. If X hasn't loaded a driver
+# for the new mouse, yet, this will not print anything. If found, it prints the
+# xinput ID. The env var DEVNAME must be set (as it is by udev).
+get_added_xinput_id() {
+  # Must have $DEVNAME set
+  if [ -z "$DEVNAME" ]; then
+    return
+  fi
+  # Get the list of xinput IDs:
+  local ids="$($XINPUT list | sed 's/.*id=\([0-9]*\).*/\1/g')"
+  if [ -z "$ids" ]; then
+    return
+  fi
+  for id in $ids; do
+    local test_node=$($XINPUT list-props $id | grep "Device Node" | \
+                      cut -d '"' -f 2)
+    if [ "$test_node" = "$DEVNAME" ]; then
+      echo $id
+      return
+    fi
+  done
+}
+
+wait_and_get_added_xinput_id() {
+  tries=10
+  while [ "$tries" -ne "0" ]; do
+    tries=$((tries - 1))
+    newid=$(get_added_xinput_id)
+    if [ -n "$newid" ]; then
+      break
+    fi
+    sleep 1
+  done
+  echo $newid
 }

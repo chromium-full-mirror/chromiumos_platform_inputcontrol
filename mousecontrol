@@ -150,29 +150,6 @@ find_mice() {
   done
 }
 
-# Returns the xinput ID of the newly attached mouse. If X hasn't loaded a driver
-# for the new mouse, yet, this will not print anything. If found, it prints the
-# xinput ID. The env var DEVNAME must be set (as it is by udev).
-get_added_xinput_id() {
-  # Must have $DEVNAME set
-  if [ -z "$DEVNAME" ]; then
-    return
-  fi
-  # Get the list of xinput IDs:
-  local ids="$($XINPUT list | sed 's/.*id=\([0-9]*\).*/\1/g')"
-  if [ -z "$ids" ]; then
-    return
-  fi
-  for id in $ids; do
-    local test_node=$($XINPUT list-props $id | grep "Device Node" | \
-                      cut -d '"' -f 2)
-    if [ "$test_node" = "$DEVNAME" ]; then
-      echo $id
-      return
-    fi
-  done
-}
-
 # We usually use the USB vendor/product ID to identify a device. This doesn't
 # work with devices behind a Logitech Unifying Receiver because the USB vid/pid
 # corresponds to the receiver itself and not the devices behind it. The unifying
@@ -252,15 +229,7 @@ fixup_apple_magicmouse_driver_parameters() {
 # It's run from udev. We handle this here, rather than below, since a newly
 # plugged device may not show up in xinput yet.
 if [ "$COMMAND" = "add" ]; then
-  tries=10
-  while [ "$tries" -ne "0" ]; do
-    tries=$((tries - 1))
-    newid=$(get_added_xinput_id)
-    if [ -n "$newid" ]; then
-      break
-    fi
-    sleep 1
-  done
+  newid=$(wait_and_get_added_xinput_id)
   if [ -z "$newid" ]; then
     return
   fi
