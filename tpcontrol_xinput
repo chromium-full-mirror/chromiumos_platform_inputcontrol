@@ -23,9 +23,6 @@ PREF_SENS_DEFAULT=3
 PREF_TAP_FILE=/home/chronos/user/touchpad_tap_enable
 PREF_TAP_VALID="[01]"
 PREF_TAP_DEFAULT=0
-PREF_3FCLICK_FILE=/home/chronos/user/touchpad_3f_click_enable
-PREF_3FCLICK_VALID="[01]"
-PREF_3FCLICK_DEFAULT=0
 PREF_T5R2_3FCLICK_FILE=/home/chronos/user/touchpad_t5r2_3f_click_enable
 PREF_T5R2_3FCLICK_VALID="[01]"
 PREF_T5R2_3FCLICK_DEFAULT=0
@@ -56,7 +53,7 @@ usage() {
   echo "Usage:"\
     "$PROG {status|log ['alt']|tap_dragging [on|off]|"\
     "taptoclick [on|off]|sensitivity [1-5]|"\
-    "three_finger_click [on|off]|t5r2_three_finger_click [on|off]|"\
+    "t5r2_three_finger_click [on|off]|"\
     "three_finger_swipe [on|off]|"\
     "set <property> <value>|add|listdev}"
 }
@@ -148,8 +145,7 @@ elif [ "$COMMAND" = "sensitivity" -a $# = 2 ] ; then
   store_pref SENS "$VALUE"
   VALID=1
 elif [ "$COMMAND" = "three_finger_click" -a $# = 2 ] ; then
-  VALUE=$2
-  apply_on_off_prop "Three Finger Click Enable" "$VALUE" "3FCLICK"
+  # 3F click is no longer experimental -> ignore this command
 elif [ "$COMMAND" = "t5r2_three_finger_click" -a $# = 2 ] ; then
   VALUE=$2
   apply_on_off_prop "T5R2 Three Finger Click Enable" "$VALUE" "T5R2_3FCLICK"
@@ -204,7 +200,6 @@ elif [ "$COMMAND" = "add" -a $# = 1 ] ; then
   $XINPUT set-prop $DEVICE "Sensitivity" "$(load_pref SENS)"
   $XINPUT set-prop $DEVICE "Tap Drag Enable" "$(load_pref TAPDRAG)"
   $XINPUT set-prop $DEVICE "Tap Enable" "$(load_pref TAP)"
-  $XINPUT set-prop $DEVICE "Three Finger Click Enable" "$(load_pref 3FCLICK)"
   $XINPUT set-prop $DEVICE "T5R2 Three Finger Click Enable" \
       "$(load_pref T5R2_3FCLICK)"
   $XINPUT set-prop $DEVICE "Three Finger Swipe Enable" \
