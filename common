@@ -49,6 +49,14 @@ find_pad() {
          if ($i ~/id=/) print substr($i, 4) }'
 }
 
+find_touchscreen() {
+  # Use xinput to find if any touchscreen device is present. Then find its
+  # device ID number.
+  xinput list | \
+    awk '/[tT]ouch[sS]creen/ { for (i=1; i<NF; i++) \
+         if ($i ~/id=/) print substr($i, 4) }'
+}
+
 # Returns the xinput ID of the newly attached mouse. If X hasn't loaded a driver
 # for the new mouse, yet, this will not print anything. If found, it prints the
 # xinput ID. The env var DEVNAME must be set (as it is by udev).
