@@ -41,6 +41,17 @@ store_pref() {
   echo $value > "$PREF_FILE"
 }
 
+list_input_device() {
+  xinput --list --id-only
+}
+
+get_device_name() {
+  if [ -z "$1" ]; then
+    return 1
+  fi
+  xinput --list --name-only $1
+}
+
 canonical_ids() {
   # In case minus number is passed, truncate it to the last 4 hexdigits.
   # e.g., -16360 -> ffffffffffffc018 -> c018
@@ -80,17 +91,25 @@ is_multitouch_mouse() {
 find_pad() {
   # Use xinput to find if any touchpad device is present. Then find its
   # device ID number.
-  xinput list | \
-    awk '/[pP]ad|cyapa/ { for (i=1; i<NF; i++) \
-         if ($i ~/id=/) print substr($i, 4) }'
+  local device_id
+  for device_id in $(list_input_device); do
+    if get_device_name ${device_id} | grep -q '[pP]ad\|cyapa'; then
+      echo ${device_id}
+    elif is_multitouch_mouse ${device_id}; then
+      echo ${device_id}
+    fi
+  done
 }
 
 find_touchscreen() {
   # Use xinput to find if any touchscreen device is present. Then find its
   # device ID number.
-  xinput list | \
-    awk '/[tT]ouch[sS]creen/ { for (i=1; i<NF; i++) \
-         if ($i ~/id=/) print substr($i, 4) }'
+  local device_id
+  for device_id in $(list_input_device); do
+    if get_device_name ${device_id} | grep -q '[tT]ouch[sS]creen'; then
+      echo ${device_id}
+    fi
+  done
 }
 
 # Returns the xinput ID of the newly attached mouse. If X hasn't loaded a driver

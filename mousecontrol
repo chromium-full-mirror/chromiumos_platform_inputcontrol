@@ -130,6 +130,8 @@ find_mice() {
     local match=$($XINPUT list-props $pointer | grep "Evdev" | wc -l)
     if [ "$match" != "0" ]; then
       echo -n " $pointer"
+    elif is_multitouch_mouse ${pointer}; then
+      echo -n " ${pointer}"
     fi
   done
 }
@@ -233,7 +235,7 @@ fi
 
 usage() {
   echo "Usage:" \
-    "$PROG {add|status|sensitivity [1-5]|swap_left_right" \
+    "$PROG {listdev|add|status|sensitivity [1-5]|swap_left_right" \
     "[01]|set property value}"
 }
 
@@ -245,6 +247,11 @@ VALID=0
 
 if [ $# = 0 ] ; then
   VALID=0
+elif [ "$COMMAND" = "listdev" -a $# = 1 ] ; then
+  for mouse in $MICE ; do
+    echo "${mouse}"
+  done
+  VALID=1
 elif [ "$COMMAND" = "status" -a $# = 1 ] ; then
   for mouse in $MICE ; do
     echo "Details for mouse ${mouse}:"
