@@ -76,34 +76,6 @@ apply_swap_lr() {
   done
 }
 
-canonical_ids() {
-  # In case minus number is passed, truncate it to the last 4 hexdigits.
-  # e.g., -16360 -> ffffffffffffc018 -> c018
-  local id_strings id_str first
-  read id_strings
-  for id_str in $id_strings; do
-    if [ -n "$first" ]; then
-      printf ":"
-    fi
-    printf "%04x" "$id_str" | sed 's/.*\(.\{4\}\)$/\1/'
-    first="not"
-  done
-}
-
-vendor_product_for_xinput_id() {
-  local xinput_id="$1"
-
-  local vp="$(xinput list-props $xinput_id | fgrep "Device Product ID" | \
-              cut -d : -f 2 | sed 's/,//' | canonical_ids)"
-  if ! echo "${vp}" | grep -q ':'; then
-    vp="$(xinput list-props $xinput_id | fgrep "Device Vendor ID" | \
-          cut -d : -f 2 | canonical_ids)"
-    vp="${vp}:$(xinput list-props $xinput_id | fgrep "Device Product ID" | \
-                cut -d : -f 2 | canonical_ids)"
-  fi
-  echo "$vp"
-}
-
 # Remaps buttons for a device
 apply_button_remap() {
   local xinput_ids="$1"
@@ -121,13 +93,25 @@ apply_button_remap() {
   done
 }
 
+apply_cpi_for_mouse() {
+  local mouse="$1"
+  if is_multitouch_mouse $1; then
+    $XINPUT set-prop $mouse "Mouse CPI" $(get_cpi $mouse)
+    $XINPUT set-prop $mouse "Device Accel Profile" -1
+    $XINPUT set-prop $mouse "Device Accel Constant Deceleration" 1
+    $XINPUT set-prop $mouse "Device Accel Velocity Scaling" 1
+  else
+    $XINPUT set-prop $mouse "Device Accel Constant Deceleration" \
+        $(get_cpi $mouse)
+    $XINPUT set-prop $mouse "Device Accel Velocity Scaling" 1
+  fi
+}
+
 # Applies the correct CPI to the given mice
 apply_cpi() {
   local mice="$1"
   for mouse in $mice ; do
-    $XINPUT set-prop $mouse "Device Accel Constant Deceleration" \
-        $(get_cpi $mouse)
-    $XINPUT set-prop $mouse "Device Accel Velocity Scaling" 1
+    apply_cpi_for_mouse $mouse
   done
 }
 
@@ -234,8 +218,7 @@ if [ "$COMMAND" = "add" ]; then
   if [ -z "$newid" ]; then
     return
   fi
-  $XINPUT set-prop $newid "Device Accel Constant Deceleration" $(get_cpi $newid)
-  $XINPUT set-prop $newid "Device Accel Velocity Scaling" 1
+  apply_cpi_for_mouse $newid
 
   sens=$(load_pref SENS)
   apply_sensitivity $sens "$newid"

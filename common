@@ -41,6 +41,42 @@ store_pref() {
   echo $value > "$PREF_FILE"
 }
 
+canonical_ids() {
+  # In case minus number is passed, truncate it to the last 4 hexdigits.
+  # e.g., -16360 -> ffffffffffffc018 -> c018
+  local id_strings id_str first
+  read id_strings
+  for id_str in $id_strings; do
+    if [ -n "$first" ]; then
+      printf ":"
+    fi
+    printf "%04x" "$id_str" | sed 's/.*\(.\{4\}\)$/\1/'
+    first="not"
+  done
+}
+
+vendor_product_for_xinput_id() {
+  local xinput_id="$1"
+
+  local vp="$(xinput list-props $xinput_id | fgrep "Device Product ID" | \
+              cut -d : -f 2 | sed 's/,//' | canonical_ids)"
+  if ! echo "${vp}" | grep -q ':'; then
+    vp="$(xinput list-props $xinput_id | fgrep "Device Vendor ID" | \
+          cut -d : -f 2 | canonical_ids)"
+    vp="${vp}:$(xinput list-props $xinput_id | fgrep "Device Product ID" | \
+                cut -d : -f 2 | canonical_ids)"
+  fi
+  echo "$vp"
+}
+
+is_multitouch_mouse() {
+  # Whitelist of multitouch mice.
+  case "$(vendor_product_for_xinput_id $1)" in
+    "05ac:030d") true;;  # Apple magicmouse (BT)
+    *)           false;;
+  esac
+}
+
 find_pad() {
   # Use xinput to find if any touchpad device is present. Then find its
   # device ID number.
