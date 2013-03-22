@@ -140,7 +140,10 @@ elif [ "$COMMAND" = "taptoclick" -a $# = 2 ] ; then
 elif [ "$COMMAND" = "sensitivity" -a $# = 2 ] ; then
   VALUE=$2
   for DEVICE in $DEVICES ; do
-    $XINPUT set-prop $DEVICE "Sensitivity" "$VALUE"
+    if ! is_multitouch_mouse ${DEVICE}; then
+      $XINPUT set-prop $DEVICE "Pointer Sensitivity" "$VALUE"
+    fi
+    $XINPUT set-prop $DEVICE "Scroll Sensitivity" "$VALUE"
   done
   store_pref SENS "$VALUE"
   VALID=1
@@ -198,7 +201,10 @@ elif [ "$COMMAND" = "add" -a $# = 1 ] ; then
   if [ -z "$DEVICE" ]; then
     logger New touchpad device not found with xinput: $DEVNAME
   fi
-  $XINPUT set-prop $DEVICE "Sensitivity" "$(load_pref SENS)"
+  if ! is_multitouch_mouse ${DEVICE}; then
+    $XINPUT set-prop $DEVICE "Pointer Sensitivity" "$(load_pref SENS)"
+  fi
+  $XINPUT set-prop $DEVICE "Scroll Sensitivity" "$(load_pref SENS)"
   $XINPUT set-prop $DEVICE "Tap Drag Enable" "$(load_pref TAPDRAG)"
   $XINPUT set-prop $DEVICE "Tap Enable" "$(load_pref TAP)"
   $XINPUT set-prop $DEVICE "T5R2 Three Finger Click Enable" \

@@ -55,7 +55,11 @@ apply_sensitivity() {
     return
   fi
   for mouse in $mice ; do
-    $XINPUT set-ptr-feedback $mouse $thresh_and_acc 1
+    if is_multitouch_mouse ${mouse}; then
+      $XINPUT set-prop ${mouse} "Pointer Sensitivity" "${sens}"
+    else
+      $XINPUT set-ptr-feedback $mouse $thresh_and_acc 1
+    fi
   done
 }
 
