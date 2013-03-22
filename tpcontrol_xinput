@@ -146,6 +146,7 @@ elif [ "$COMMAND" = "sensitivity" -a $# = 2 ] ; then
   VALID=1
 elif [ "$COMMAND" = "three_finger_click" -a $# = 2 ] ; then
   # 3F click is no longer experimental -> ignore this command
+  true
 elif [ "$COMMAND" = "t5r2_three_finger_click" -a $# = 2 ] ; then
   VALUE=$2
   apply_on_off_prop "T5R2 Three Finger Click Enable" "$VALUE" "T5R2_3FCLICK"
