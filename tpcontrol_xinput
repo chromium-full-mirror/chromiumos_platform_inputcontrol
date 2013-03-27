@@ -104,6 +104,7 @@ elif [ "$COMMAND" = "status" -a $# = 1 ] ; then
 elif [ "$COMMAND" = "log" -a \( $# = 1 -o $# = 2 \) ] ; then
   now=$(date '+%Y%m%d-%H%M%S')
   for DEVICE in $DEVICES ; do
+    DEVNAME="$(get_device_name $DEVICE | sed 's/[^a-zA-Z0-9]/_/g')"
     $XINPUT set-prop $DEVICE "Logging Notify" 1
     $XINPUT set-prop $DEVICE "Dump Debug Log" 1
     sleep 0.5
@@ -113,7 +114,7 @@ elif [ "$COMMAND" = "log" -a \( $# = 1 -o $# = 2 \) ] ; then
       out_dir=/debugd/touchpad
     fi
     out_prefix=touchpad_activity_
-    out_file="${out_dir}/${out_prefix}${now}.$DEVICE"
+    out_file="${out_dir}/${out_prefix}${now}.$DEVICE.$DEVNAME"
     cmt_log_file=/var/log/cmt_input_events.dat
     cmt_out_prefix=cmt_input_events_
     cmt_out_file="${out_dir}/${cmt_out_prefix}${now}.$DEVICE"
@@ -123,8 +124,8 @@ elif [ "$COMMAND" = "log" -a \( $# = 1 -o $# = 2 \) ] ; then
       gzip -c --stdout "$raw_file" > "$out_file"
       gzip -c --stdout "$cmt_log_file" > "$cmt_out_file"
       # Delete old log files
-      delete="$(ls -t ${out_dir}/${out_prefix}* | tail -n '+6')"
-      delete="${delete} $(ls -t ${out_dir}/${cmt_out_prefix}* | tail -n '+6')"
+      delete="$(ls -t ${out_dir}/${out_prefix}* | grep -v ${now})"
+      delete="${delete} $(ls -t ${out_dir}/${cmt_out_prefix}* | grep -v ${now})"
       for file in $delete ; do
         rm -f "$file"
       done
