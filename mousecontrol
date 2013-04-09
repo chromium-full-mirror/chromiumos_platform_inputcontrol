@@ -86,14 +86,14 @@ apply_button_remap() {
 
   for xinput_id in $xinput_ids ; do
     local vp="$(vendor_product_for_xinput_id $xinput_id)"
-    case $vp in
-      "05ac:0304")  # Apple USB Mighty Mouse: Disable side button
-        $XINPUT get-button-map $xinput_id | awk \
-            '{ for (i=1; i <= NF; i++) { \
-                 if (i == 8) { printf 0 } else { printf $(i) }; printf " " \
-               } } END{ print "" }' | \
-            xargs $XINPUT set-button-map $xinput_id;;
-    esac
+    # 0304: USB Magic Mouse, 030c: BT Magic Mouse
+    if [ "$vp" = "05ac:0304" -o "$vp" = "05ac:030c" ]; then
+      $XINPUT get-button-map $xinput_id | awk \
+          '{ for (i=1; i <= NF; i++) { \
+               if (i == 8) { printf 0 } else { printf $(i) }; printf " " \
+             } } END{ print "" }' | \
+          xargs $XINPUT set-button-map $xinput_id
+    fi
   done
 }
 
@@ -174,7 +174,8 @@ get_cpi() {
     "047d:1020") cpi=300;;  # Kensington Expert Mouse (trackball)*
     "047d:2041") cpi=300;;  # Kensington SlimBlade Trackball (trackball)*
     "04d9:2519") cpi=400;;  # FAVI Wireless Keyboard (TouchPad)*
-    "05ac:0304") cpi=400;;  # Apple USB Optical Mouse
+    "05ac:0304") cpi=400;;  # Apple USB Optical Mouse (Mighty Mouse)
+    "05ac:030c") cpi=400;;  # Apple BT Optical Mouse (Mighty Mouse)
     "05ac:030d") cpi=1780;; # Apple magicmouse (BT)
     "05ac:"*)    cpi=373;;  # Apple mice (other)
     "06cb:0009") cpi=$trackpoint_cpi;;  # USB IBM Trackpoint
