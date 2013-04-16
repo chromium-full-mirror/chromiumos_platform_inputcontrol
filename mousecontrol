@@ -163,6 +163,7 @@ get_cpi() {
     "046d:c016") cpi=377;;  # HP branded "Logitech, Inc. Optical Wheel Mouse"
     "046d:c018") cpi=530;;  # "Logitech, Inc. Optical Wheel Mouse" model M-UAE96
     "046d:c03e") cpi=464;;  # Logitech Premium Optical Wheel Mouse (M-BT58)
+    "046d:c077") cpi=580;;  # HP branded "Logitech USB Optical Mouse"
     # According to http://www.linux-usb.org/usb.ids , these are 4 trackballs:
     "046d:c40"*) cpi=300;;  # Logitech Trackballs*
     "046d:c508") cpi=300;;  # Cordless Trackball
