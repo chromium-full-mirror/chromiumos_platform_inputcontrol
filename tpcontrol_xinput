@@ -105,17 +105,38 @@ elif [ "$COMMAND" = "log" -a \( $# = 1 -o $# = 2 \) ] ; then
   now=$(date '+%Y%m%d-%H%M%S')
   for DEVICE in $DEVICES ; do
     DEVNAME="$(get_device_name $DEVICE | sed 's/[^a-zA-Z0-9]/_/g')"
+    raw_file=/var/log/touchpad_activity_log.txt
+    cmt_log_file=/var/log/cmt_input_events.dat
+    rm -f $raw_file $cmt_log_file
     $XINPUT set-prop $DEVICE "Logging Notify" 1
     $XINPUT set-prop $DEVICE "Dump Debug Log" 1
-    sleep 0.5
-    raw_file=/var/log/touchpad_activity_log.txt
+
+    # Wait for writing to the files to complete. We do this by waiting for
+    # two consecutive checks in which the file size of the logs doesn't change.
+    raw_size="-1"
+    cmt_size="-1"
+    max_iterations=6
+    while true; do
+      raw_size_new=$(stat -c %s $raw_file)
+      cmt_size_new=$(stat -c %s $cmt_log_file)
+      if [ $raw_size -eq $raw_size_new -a $cmt_size -eq $cmt_size_new ]; then
+        break
+      fi
+      max_iterations=$((max_iterations - 1))
+      if [ $max_iterations -lt 0 ]; then
+        break
+      fi
+      sleep 0.5
+      raw_size=$raw_size_new
+      cmt_size=$cmt_size_new
+    done
+
     out_dir=/home/chronos/user/log
     if [ "$2" = "alt" ]; then
       out_dir=/debugd/touchpad
     fi
     out_prefix=touchpad_activity_
     out_file="${out_dir}/${out_prefix}${now}.$DEVICE.$DEVNAME"
-    cmt_log_file=/var/log/cmt_input_events.dat
     cmt_out_prefix=cmt_input_events_
     cmt_out_file="${out_dir}/${cmt_out_prefix}${now}.$DEVICE"
     if [ ! -d $out_dir ]; then
