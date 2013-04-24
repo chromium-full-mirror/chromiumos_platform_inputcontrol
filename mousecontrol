@@ -183,6 +183,7 @@ get_cpi() {
     "0a5c:8502") cpi=400;;  # FAVI Wireless Keyboard (TouchPad), Bluetooth*
     "0c45:7000") cpi=400;;  # FAVI Entertainment Wireless Keyboard (TouchPad)*
     "1532:0016") cpi=1714;; # Razer USA, Ltd DeathAdder RZ01-0015
+    "17ef:6009") cpi=$trackpoint_cpi;;  # Lenovo ThinkPad Keyboard w/ TrackPoint
     "17ef:6014") cpi=400;;  # Lenovo N5901 multimedia keyboard/trackball*
     "17ef:602b") cpi=400;;  # Lenovo N5902 multimedia keyboard/OFN*
     "1997:0409") cpi=400;;  # Riitek Rii Mote i6 (TouchPad)*
