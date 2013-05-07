@@ -160,6 +160,7 @@ get_cpi() {
     "046d:400e") cpi=400;;  # K400 touchpad[u]
     "046d:4024") cpi=400;;  # K400r touchpad[u]
     "046d:c00f") cpi=385;;  # Logitech MouseMan Traveler/Mobile
+    "046d:c014") cpi=425;;  # HP branded "Logitech Optical USB Mouse"
     "046d:c016") cpi=377;;  # HP branded "Logitech, Inc. Optical Wheel Mouse"
     "046d:c018") cpi=530;;  # "Logitech, Inc. Optical Wheel Mouse" model M-UAE96
     "046d:c03e") cpi=464;;  # Logitech Premium Optical Wheel Mouse (M-BT58)
