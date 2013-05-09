@@ -155,6 +155,7 @@ get_cpi() {
   local trackpoint_cpi=400;  # Approximate, since CPI doesn't exactly apply
   case $vp in
     "0002:000a") cpi=$trackpoint_cpi;;  # PS/2 IBM Trackpoint
+    "045e:0024") cpi=400;;  # Microsoft Corp. Trackball Explorer*
     "0461:4d22") cpi=474;;  # Standard Dell
     "046d:1028") cpi=600;;  # M570 trackball[u]
     "046d:400e") cpi=400;;  # K400 touchpad[u]
