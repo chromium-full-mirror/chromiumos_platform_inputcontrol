@@ -87,6 +87,9 @@ is_multitouch_mouse() {
   # Whitelist of multitouch mice.
   case "$(vendor_product_for_xinput_id $1)" in
     "05ac:030d") true;;  # Apple magicmouse (BT)
+    "046d:4026") true;;  # Logitech T400 (Unifying)
+    "046d:4027") true;;  # Logitech T620 (Unifying)
+    "046d:b00d") true;;  # Logitech Touch Mouse (BT)
     *)           false;;
   esac
 }
