@@ -86,7 +86,7 @@ apply_button_remap() {
 
   for xinput_id in $xinput_ids ; do
     local vp="$(vendor_product_for_xinput_id $xinput_id)"
-    # 0304: USB Magic Mouse, 030c: BT Magic Mouse
+    # 0304: USB Mighty Mouse, 030c: BT Mighty Mouse
     if [ "$vp" = "05ac:0304" -o "$vp" = "05ac:030c" ]; then
       $XINPUT get-button-map $xinput_id | awk \
           '{ for (i=1; i <= NF; i++) { \
