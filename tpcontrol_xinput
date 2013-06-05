@@ -16,23 +16,6 @@ export XAUTHORITY=/home/chronos/.Xauthority
 PROG=`basename $0`
 COMMAND=$1
 
-# On disk preferences
-PREF_SENS_FILE=/home/chronos/user/touchpad_sensitivity
-PREF_SENS_VALID="[12345]"
-PREF_SENS_DEFAULT=3
-PREF_TAP_FILE=/home/chronos/user/touchpad_tap_enable
-PREF_TAP_VALID="[01]"
-PREF_TAP_DEFAULT=0
-PREF_T5R2_3FCLICK_FILE=/home/chronos/user/touchpad_t5r2_3f_click_enable
-PREF_T5R2_3FCLICK_VALID="[01]"
-PREF_T5R2_3FCLICK_DEFAULT=0
-PREF_3FSWIPE_FILE=/home/chronos/user/touchpad_3f_swipe_enable
-PREF_3FSWIPE_VALID="[01]"
-PREF_3FSWIPE_DEFAULT=0
-PREF_TAPDRAG_FILE=/home/chronos/user/touchpad_tap_drag_enable
-PREF_TAPDRAG_VALID="[01]"
-PREF_TAPDRAG_DEFAULT=0
-
 # For tpcontrol firmware trials
 TP_FIRMWARE_TRIAL_SELECTION_FILE=/var/cache/touch_trial/selection
 TP_FIRMWARE_TRIAL_CHOICES_FILE=/opt/google/touchpad/firmware/choices
@@ -75,14 +58,12 @@ parse_bool() {
 apply_on_off_prop() {
   local prop_name="$1"
   local value="$2"
-  local pref_name="$3"
 
   local num_val=$(parse_bool "$value")
   if [ -n "$num_val" ]; then
     for DEVICE in $DEVICES ; do
       $XINPUT set-prop $DEVICE "$prop_name" "$num_val"
     done
-    store_pref "$pref_name" "$num_val"
     VALID=1
   else
     VALID=0
@@ -155,10 +136,10 @@ elif [ "$COMMAND" = "log" -a \( $# = 1 -o $# = 2 \) ] ; then
   VALID=1
 elif [ "$COMMAND" = "tap_dragging" -a $# = 2 ] ; then
   VALUE=$2
-  apply_on_off_prop "Tap Drag Enable" "$VALUE" "TAPDRAG"
+  apply_on_off_prop "Tap Drag Enable" "$VALUE"
 elif [ "$COMMAND" = "taptoclick" -a $# = 2 ] ; then
   VALUE=$2
-  apply_on_off_prop "Tap Enable" "$VALUE" "TAP"
+  apply_on_off_prop "Tap Enable" "$VALUE"
 elif [ "$COMMAND" = "sensitivity" -a $# = 2 ] ; then
   VALUE=$2
   for DEVICE in $DEVICES ; do
@@ -167,17 +148,16 @@ elif [ "$COMMAND" = "sensitivity" -a $# = 2 ] ; then
     fi
     $XINPUT set-prop $DEVICE "Scroll Sensitivity" "$VALUE"
   done
-  store_pref SENS "$VALUE"
   VALID=1
 elif [ "$COMMAND" = "three_finger_click" -a $# = 2 ] ; then
   # 3F click is no longer experimental -> ignore this command
   true
 elif [ "$COMMAND" = "t5r2_three_finger_click" -a $# = 2 ] ; then
   VALUE=$2
-  apply_on_off_prop "T5R2 Three Finger Click Enable" "$VALUE" "T5R2_3FCLICK"
+  apply_on_off_prop "T5R2 Three Finger Click Enable" "$VALUE"
 elif [ "$COMMAND" = "three_finger_swipe" -a $# = 2 ] ; then
   VALUE=$2
-  apply_on_off_prop "Three Finger Swipe Enable" "$VALUE" "3FSWIPE"
+  apply_on_off_prop "Three Finger Swipe Enable" "$VALUE"
 elif [ "$COMMAND" = "set" -a $# = 3 ] ; then
   PROP=$2
   VALUE=$3
@@ -215,24 +195,6 @@ elif [ "$COMMAND" = "firmware" -a $# = 2 ]; then
   else
     echo "Touchpad trial firmwares not supported."
   fi
-  VALID=1
-elif [ "$COMMAND" = "add" -a $# = 1 ] ; then
-  # New device. Set sensitivity/tap enable
-  # Give some time for device to arrive, if necessary
-  DEVICE=$(wait_and_get_added_xinput_id)
-  if [ -z "$DEVICE" ]; then
-    logger New touchpad device not found with xinput: $DEVNAME
-  fi
-  if ! is_multitouch_mouse ${DEVICE}; then
-    $XINPUT set-prop $DEVICE "Pointer Sensitivity" "$(load_pref SENS)"
-  fi
-  $XINPUT set-prop $DEVICE "Scroll Sensitivity" "$(load_pref SENS)"
-  $XINPUT set-prop $DEVICE "Tap Drag Enable" "$(load_pref TAPDRAG)"
-  $XINPUT set-prop $DEVICE "Tap Enable" "$(load_pref TAP)"
-  $XINPUT set-prop $DEVICE "T5R2 Three Finger Click Enable" \
-      "$(load_pref T5R2_3FCLICK)"
-  $XINPUT set-prop $DEVICE "Three Finger Swipe Enable" \
-      "$(load_pref 3FSWIPE)"
   VALID=1
 elif [ "$COMMAND" = "listdev" -a $# = 1 ] ; then
   find_pad

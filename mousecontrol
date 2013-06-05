@@ -18,14 +18,6 @@ SCREEN_DPI=125
 export DISPLAY=:0
 export XAUTHORITY=/home/chronos/.Xauthority
 
-# On disk preferences
-PREF_SENS_FILE=/home/chronos/user/mouse_sensitivity
-PREF_SENS_VALID="[12345]"
-PREF_SENS_DEFAULT=3
-PREF_SWAP_LR_FILE=/home/chronos/user/mouse_swap_lr_buttons
-PREF_SWAP_LR_VALID="[01]"
-PREF_SWAP_LR_DEFAULT=0
-
 # We are supposed to set an xinput setting as screen DPI * a multiplier that
 # describes how fast the mouse should be (user preference). This function
 # returns that product.
@@ -206,27 +198,6 @@ fixup_apple_magicmouse_driver_parameters() {
   echo 0 > /sys/module/hid_magicmouse/parameters/emulate_scroll_wheel
 }
 
-# Add is a special command that's run possibly before xinput detects the mice.
-# It's run from udev. We handle this here, rather than below, since a newly
-# plugged device may not show up in xinput yet.
-if [ "$COMMAND" = "add" ]; then
-  newid=$(wait_and_get_added_xinput_id)
-  if [ -z "$newid" ]; then
-    return
-  fi
-  apply_cpi_for_mouse $newid
-
-  sens=$(load_pref SENS)
-  apply_sensitivity $sens "$newid"
-  swap_lr=$(load_pref SWAP_LR)
-  apply_swap_lr $swap_lr "$newid"
-  apply_button_remap "$newid"
-
-  fixup_apple_magicmouse_driver_parameters "$newid"
-
-  exit 0
-fi
-
 usage() {
   echo "Usage:" \
     "$PROG {listdev|add|status|sensitivity [1-5]|swap_left_right" \
@@ -255,19 +226,17 @@ elif [ "$COMMAND" = "status" -a $# = 1 ] ; then
   VALID=1
 elif [ "$COMMAND" = "sensitivity" -a $# = 2 ] ; then
   sens="$2"
-  store_pref SENS "$sens"
   apply_sensitivity "$sens" "$MICE"
+  apply_cpi "$MICE"
+  apply_button_remap "$MICE"
   VALID=1
 elif [ "$COMMAND" = "swap_left_right" -a $# = 2 ] ; then
   value="$2"
-  store_pref SWAP_LR "$value"
   apply_swap_lr "$value" "$MICE"
   VALID=1
 elif [ "$COMMAND" = "refresh" -a $# = 1 ] ; then
   apply_cpi "$MICE"
   apply_button_remap "$MICE"
-  apply_sensitivity $(load_pref SENS) "$MICE"
-  apply_swap_lr $(load_pref SWAP_LR) "$MICE"
   VALID=1
 elif [ "$COMMAND" = "set" -a $# = 3 ] ; then
   prop=$2
