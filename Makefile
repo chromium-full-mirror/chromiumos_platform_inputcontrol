@@ -24,6 +24,8 @@ TS_SCRIPTS=\
 
 TS_SCRIPTS_DIR=/opt/google/touchscreen
 
+UDEV_RULE=99-inputcontrol.rules
+
 INIT_DIR=/etc/init
 
 UPSTART_CONF=\
@@ -32,7 +34,7 @@ UPSTART_CONF=\
 
 DESTDIR = .
 
-install: $(MOUSE_SCRIPTS) $(TP_SCRIPTS) $(UPSTART_CONF)
+install: $(MOUSE_SCRIPTS) $(TP_SCRIPTS) $(UDEV_RULE) $(UPSTART_CONF)
 	mkdir -p $(DESTDIR)/$(MOUSE_SCRIPTS_DIR)
 	cp -p $(MOUSE_SCRIPTS) $(DESTDIR)/$(MOUSE_SCRIPTS_DIR)
 	chmod 0755 $(DESTDIR)/$(MOUSE_SCRIPTS_DIR)/*
@@ -43,5 +45,7 @@ install: $(MOUSE_SCRIPTS) $(TP_SCRIPTS) $(UPSTART_CONF)
 	cp -p $(TS_SCRIPTS) $(DESTDIR)/$(TS_SCRIPTS_DIR)
 	chmod 0755 $(DESTDIR)/$(TS_SCRIPTS_DIR)/*
 
+	install -D -m 0644 $(UDEV_RULE) \
+		$(DESTDIR)/lib/udev/rules.d/$(UDEV_RULE)
 	install -d $(DESTDIR)$(INIT_DIR)
 	install -m 0644 $(UPSTART_CONF) $(DESTDIR)$(INIT_DIR)
