@@ -157,6 +157,7 @@ get_cpi() {
     "046d:c014") cpi=425;;  # HP branded "Logitech Optical USB Mouse"
     "046d:c016") cpi=377;;  # HP branded "Logitech, Inc. Optical Wheel Mouse"
     "046d:c018") cpi=530;;  # "Logitech, Inc. Optical Wheel Mouse" model M-UAE96
+    "046d:c03d") cpi=434;;  # Logitech M-BT96a Pilot Optical Mouse
     "046d:c03e") cpi=464;;  # Logitech Premium Optical Wheel Mouse (M-BT58)
     "046d:c077") cpi=580;;  # HP branded "Logitech USB Optical Mouse"
     # According to http://www.linux-usb.org/usb.ids , these are 4 trackballs:
