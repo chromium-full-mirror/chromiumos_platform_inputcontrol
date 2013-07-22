@@ -241,45 +241,64 @@ if [ -z "$MICE" ]; then
 fi
 VALID=0
 
+# If no args passed, print usage
 if [ $# = 0 ] ; then
-  VALID=0
-elif [ "$COMMAND" = "listdev" -a $# = 1 ] ; then
-  for mouse in $MICE ; do
-    echo "${mouse}"
-  done
-  VALID=1
-elif [ "$COMMAND" = "status" -a $# = 1 ] ; then
-  for mouse in $MICE ; do
-    echo "Details for mouse ${mouse}:"
-    $XINPUT list-props $mouse
-    $XINPUT get-feedbacks $mouse
-  done
-  VALID=1
-elif [ "$COMMAND" = "sensitivity" -a $# = 2 ] ; then
-  sens="$2"
-  store_pref SENS "$sens"
-  apply_sensitivity "$sens" "$MICE"
-  VALID=1
-elif [ "$COMMAND" = "swap_left_right" -a $# = 2 ] ; then
-  value="$2"
-  store_pref SWAP_LR "$value"
-  apply_swap_lr "$value" "$MICE"
-  VALID=1
-elif [ "$COMMAND" = "refresh" -a $# = 1 ] ; then
-  apply_cpi "$MICE"
-  apply_button_remap "$MICE"
-  apply_sensitivity $(load_pref SENS) "$MICE"
-  apply_swap_lr $(load_pref SWAP_LR) "$MICE"
-  VALID=1
-elif [ "$COMMAND" = "set" -a $# = 3 ] ; then
-  prop=$2
-  value=$3
-  for mouse in $MICE ; do
-    $XINPUT set-prop $mouse "$prop" "$value"
-  done
-  VALID=1
+  usage
+  exit 1
 fi
 
-if [ $VALID = 0 ] ; then
-  usage
-fi
+while true ; do
+  COMMAND=$1
+  VALID=0
+
+  if [ $# = 0 ] ; then
+    # If no commands remain, we're done
+    exit 0
+  elif [ "$COMMAND" = "listdev" ] ; then
+    for mouse in $MICE ; do
+      echo "${mouse}"
+    done
+    VALID=1
+    shift
+  elif [ "$COMMAND" = "status" ] ; then
+    for mouse in $MICE ; do
+      echo "Details for mouse ${mouse}:"
+      $XINPUT list-props $mouse
+      $XINPUT get-feedbacks $mouse
+    done
+    VALID=1
+    shift
+  elif [ "$COMMAND" = "sensitivity" -a -n "$2" ] ; then
+    sens="$2"
+    store_pref SENS "$sens"
+    apply_sensitivity "$sens" "$MICE"
+    VALID=1
+    shift 2
+  elif [ "$COMMAND" = "swap_left_right" -a -n "$2" ] ; then
+    value="$2"
+    store_pref SWAP_LR "$value"
+    apply_swap_lr "$value" "$MICE"
+    VALID=1
+    shift 2
+  elif [ "$COMMAND" = "refresh" ] ; then
+    apply_cpi "$MICE"
+    apply_button_remap "$MICE"
+    apply_sensitivity $(load_pref SENS) "$MICE"
+    apply_swap_lr $(load_pref SWAP_LR) "$MICE"
+    VALID=1
+    shift
+  elif [ "$COMMAND" = "set" -a -n "$2" -a -n "$3" ] ; then
+    prop=$2
+    value=$3
+    for mouse in $MICE ; do
+      $XINPUT set-prop $mouse "$prop" "$value"
+    done
+    VALID=1
+    shift 3
+  fi
+
+  if [ $VALID = 0 ] ; then
+    usage
+    exit 1
+  fi
+done
