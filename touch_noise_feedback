@@ -6,7 +6,7 @@
 # Log all calls, with arguments, to /var/log/messages
 logger "$0" "$@"
 
-TOUCH_NOISE_LOG="/var/log/touch_noise.log"
+TOUCH_NOISE_LOG="/var/log/xorg/touch_noise.log"
 if [ -f "$TOUCH_NOISE_LOG" ]; then
   gzip -c "$TOUCH_NOISE_LOG" | uuencode -m touch_noise_log.gz
 fi
