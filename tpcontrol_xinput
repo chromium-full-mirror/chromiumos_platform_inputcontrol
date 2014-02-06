@@ -117,7 +117,6 @@ while true; do
       DEVNAME="$(get_device_name $DEVICE | sed 's/[^a-zA-Z0-9]/_/g')"
       raw_file=/var/log/xorg/touchpad_activity_log.txt
       cmt_log_file=/var/log/xorg/cmt_input_events.dat
-      rm -f $raw_file $cmt_log_file
       $XINPUT set-prop $DEVICE "Logging Notify" 1
       $XINPUT set-prop $DEVICE "Dump Debug Log" 1
 

@@ -20,5 +20,5 @@ xinput set-prop "$DEVICE" 'Dump Debug Log' 1
 
 sleep 0.5
 
-(cd /var/log; tar -cf - evdev_input_events.dat) |
+(cd /var/log/xorg; tar -cf - evdev_input_events.dat) |
     uuencode -m touchscreen_activity_log.tar
