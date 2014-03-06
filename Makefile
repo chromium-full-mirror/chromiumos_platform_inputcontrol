@@ -4,28 +4,28 @@
 
 MOUSE_SCRIPTS=\
 	common \
-	mouse_added \
 	mousecontrol
 
 MOUSE_SCRIPTS_DIR=/opt/google/mouse
 
 TP_SCRIPTS=\
-	generate_userfeedback \
-	send_input_metrics \
-	touchpad_added \
 	tpcontrol \
 	tpcontrol_synclient \
 	tpcontrol_xinput
 
 TP_SCRIPTS_DIR=/opt/google/touchpad
 
-TS_SCRIPTS=\
-	touchscreen_feedback \
-	tscontrol \
+SCRIPTS=\
+	xinput.sh \
+	mouse_cpi.sh \
+	inputcontrol \
+	device_added \
+	cmt_feedback \
+	evdev_feedback \
 	touch_noise_feedback \
-	toggle_touch_event_logging
+	send_input_metrics
 
-TS_SCRIPTS_DIR=/opt/google/touchscreen
+SCRIPTS_DIR=/opt/google/input/
 
 UDEV_RULE=99-inputcontrol.rules
 
@@ -37,16 +37,16 @@ UPSTART_CONF=\
 
 DESTDIR = .
 
-install: $(MOUSE_SCRIPTS) $(TP_SCRIPTS) $(UDEV_RULE) $(UPSTART_CONF)
+install: $(MOUSE_SCRIPTS) $(TP_SCRIPTS) $(SCRIPTS) $(UDEV_RULE) $(UPSTART_CONF)
 	mkdir -p $(DESTDIR)/$(MOUSE_SCRIPTS_DIR)
 	cp -p $(MOUSE_SCRIPTS) $(DESTDIR)/$(MOUSE_SCRIPTS_DIR)
 	chmod 0755 $(DESTDIR)/$(MOUSE_SCRIPTS_DIR)/*
 	mkdir -p $(DESTDIR)/$(TP_SCRIPTS_DIR)
 	cp -p $(TP_SCRIPTS) $(DESTDIR)/$(TP_SCRIPTS_DIR)
 	chmod 0755 $(DESTDIR)/$(TP_SCRIPTS_DIR)/*
-	mkdir -p $(DESTDIR)/$(TS_SCRIPTS_DIR)
-	cp -p $(TS_SCRIPTS) $(DESTDIR)/$(TS_SCRIPTS_DIR)
-	chmod 0755 $(DESTDIR)/$(TS_SCRIPTS_DIR)/*
+	mkdir -p $(DESTDIR)/$(SCRIPTS_DIR)
+	cp -p $(SCRIPTS) $(DESTDIR)/$(SCRIPTS_DIR)
+	chmod 0755 $(DESTDIR)/$(SCRIPTS_DIR)/*
 
 	install -D -m 0644 $(UDEV_RULE) \
 		$(DESTDIR)/lib/udev/rules.d/$(UDEV_RULE)

@@ -4,7 +4,7 @@
 # found in the LICENSE file.
 
 # Log all calls, with arguments, to /var/log/messages
-logger "$0" "$@"
+logger -- "$0" "$@"
 
 TOUCH_NOISE_LOG="/var/log/xorg/touch_noise.log"
 if [ -f "$TOUCH_NOISE_LOG" ]; then
