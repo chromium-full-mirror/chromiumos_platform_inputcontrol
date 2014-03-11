@@ -22,7 +22,8 @@ TP_SCRIPTS_DIR=/opt/google/touchpad
 TS_SCRIPTS=\
 	touchscreen_feedback \
 	tscontrol \
-	touch_noise_feedback
+	touch_noise_feedback \
+	toggle_touch_event_logging
 
 TS_SCRIPTS_DIR=/opt/google/touchscreen
 
