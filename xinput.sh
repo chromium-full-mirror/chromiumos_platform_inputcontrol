@@ -172,6 +172,11 @@ device_is_multitouch_mouse() {
   device_is_mouse $1 && device_is_multitouch $1
 }
 
+device_is_nontouch_mouse() {
+  assert_eq $# 1
+  device_is_mouse $1 && ! device_is_multitouch $1
+}
+
 device_is_touchscreen() {
   assert_eq $# 1
   device_get_name $1 | grep -q '[tT]ouch[sS]creen'

@@ -172,6 +172,8 @@ DEFINE_prop_preference touchpad t5r3_three_finger_click "[01]" "0" \
       "T5R2 Three Finger Click Enable"
 DEFINE_prop_preference multitouch australian_scrolling "[01]" "1" \
       "Australian Scrolling"
+DEFINE_prop_preference nontouch_mouse mouse_australian_scrolling "[01]" "0" \
+      "Australian Scrolling"
 DEFINE_preference touchpad touchpad_sensitivity "[12345]" "3"
 DEFINE_preference mouse mouse_sensitivity "[12345]" "3"
 DEFINE_preference mouse mouse_swap_lr "[01]" "0"
