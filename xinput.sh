@@ -12,7 +12,6 @@ pref_folder="/home/chronos/user/cmt"
 if ! [ -d $pref_folder ]; then
   mkdir $pref_folder
 fi
-chown chronos:chronos $pref_folder
 
 # Functions for storing preferences
 # A preference requires the following global variables:
@@ -75,7 +74,6 @@ transition_legacy_pref_file() {
   if [ -f $legacy_file ]; then
     log "mv $legacy_file $new_file"
     mv $legacy_file $new_file
-    chown chronos:chronos $new_file
   fi
 }
 
