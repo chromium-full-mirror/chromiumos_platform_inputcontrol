@@ -4,9 +4,14 @@
 # found in the LICENSE file.
 
 # Log all calls, with arguments, to /var/log/messages
-logger -- "$0" "$@"
+logger "$0" "$@"
 
-. /opt/google/input/xinput.sh
+XINPUT=/usr/bin/xinput
+
+export DISPLAY=:0
+export XAUTHORITY=/home/chronos/.Xauthority
+
+. /opt/google/mouse/common
 
 # Determine whether this device has a built-in touchpad by checking
 # DEVICES_WITHOUT_BUILT_IN_TOUCHPAD.
@@ -51,6 +56,7 @@ DEVICE_COUNT=$(($DEVICE_MAX - $DEVICE_MIN + 1))
 # Probe the touchpad status.
 is_touchpad_found() {
   if is_touchpad_builtin; then
+    DEVICE="$(find_pad)"
     if [ -n "$DEVICE" ]; then
       DEVICE=$TP_PRESENT_TP_EXPECTED_BOOT
     else
