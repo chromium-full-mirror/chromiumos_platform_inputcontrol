@@ -137,8 +137,8 @@ device_get_canonical_name() {
 
 device_set_prop() {
   assert_eq $# 3
-  log "$XINPUT set-prop \"$1\" \"$2\" \"$3\""
-  $XINPUT set-prop "$1" "$2" "$3"
+  log "$XINPUT set-prop \"$1\" \"$2\" $3"
+  $XINPUT set-prop "$1" "$2" $3
 }
 
 device_get_prop() {

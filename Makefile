@@ -23,7 +23,8 @@ SCRIPTS=\
 	cmt_feedback \
 	evdev_feedback \
 	touch_noise_feedback \
-	send_input_metrics
+	send_input_metrics \
+	curve_experiment
 
 SCRIPTS_DIR=/opt/google/input/
 
