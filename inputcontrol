@@ -168,7 +168,7 @@ DEFINE_string 'logdir' '/home/chronos/user/log' \
 
 DEFINE_prop_preference touchpad tapdrag "[01]" "0" "Tap Drag Enable"
 DEFINE_prop_preference touchpad tapclick "[01]" "1" "Tap Enable"
-DEFINE_prop_preference touchpad t5r3_three_finger_click "[01]" "0" \
+DEFINE_prop_preference touchpad t5r2_three_finger_click "[01]" "0" \
       "T5R2 Three Finger Click Enable"
 DEFINE_prop_preference multitouch australian_scrolling "[01]" "1" \
       "Australian Scrolling"
