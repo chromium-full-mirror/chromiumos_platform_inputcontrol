@@ -156,7 +156,8 @@ DEFINE_string 'type' 'all' 'type of devices to operate on' 't'
 DEFINE_string 'id' '' 'id to operate on' 'i'
 DEFINE_boolean 'verbose' false \
       'show xinput commands executed by this script' 'v'
-DEFINE_boolean 'list' false 'list device ids'
+DEFINE_boolean 'list' false 'list device xinput ids'
+DEFINE_boolean 'hwprops' false 'print hardware properties of device'
 DEFINE_boolean 'names' false 'list device ids and their names'
 DEFINE_boolean 'status' false 'show devices status'
 DEFINE_string 'add' '' 'to be called by udev when a new device is added'
@@ -220,6 +221,16 @@ main() {
     if ! [ -z $devices ]; then
       echo $devices
     fi
+  fi
+  if [ ${FLAGS_hwprops} -eq ${FLAGS_TRUE} ] ; then
+    for device in $devices; do
+      local path=$(device_get_string_prop "$device" "Device Node")
+      log "evemu-describe $path"
+      evemu-describe $path
+      if [ $? -ne 0 ]; then
+        exit 1
+      fi
+    done
   fi
   if [ ${FLAGS_status} -eq ${FLAGS_TRUE} ] ; then
     for device in $devices; do

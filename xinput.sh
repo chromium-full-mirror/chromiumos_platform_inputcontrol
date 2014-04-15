@@ -152,6 +152,13 @@ device_get_bool_prop() {
   [ "$prop" = "1" ]
 }
 
+device_get_string_prop() {
+  assert_eq $# 2
+  prop=$(device_get_prop $1 "$2")
+  # get rid of " around value via eval
+  eval echo $prop
+}
+
 device_is_mouse() {
   assert_eq $# 1
   device_get_bool_prop $1 "Device Mouse"
