@@ -72,7 +72,7 @@ generate_logs() {
         local events_size_new=$(stat -c %s $cmt_log_file)
       fi
 
-      if [ $raw_size -eq $raw_size_new -a
+      if [ $raw_size -eq $raw_size_new -a \
            $events_size -eq $events_size_new ]; then
         break
       fi
