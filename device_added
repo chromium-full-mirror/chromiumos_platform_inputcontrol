@@ -6,4 +6,7 @@
 # Log all calls, with arguments, to /var/log/messages
 logger -- "$0" "$@" "$DEVNAME"
 
-/opt/google/input/inputcontrol --add="$DEVNAME" &
+# inputcontrol can't configure devices without xinput yet
+test -x /usr/bin/xinput || exit 0
+
+/opt/google/input/inputcontrol --add="$DEVNAME"
