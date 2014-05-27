@@ -15,6 +15,10 @@ TP_SCRIPTS=\
 
 TP_SCRIPTS_DIR=/opt/google/touchpad
 
+TS_SCRIPTS=toggle_touch_event_logging
+
+TS_SCRIPTS_DIR=/opt/google/touchscreen
+
 SCRIPTS=\
 	device_added
 
@@ -50,6 +54,9 @@ install_x: $(X_DEPS)
 	mkdir -p $(DESTDIR)/$(TP_SCRIPTS_DIR)
 	cp -p $(TP_SCRIPTS) $(DESTDIR)/$(TP_SCRIPTS_DIR)
 	chmod 0755 $(DESTDIR)/$(TP_SCRIPTS_DIR)/*
+	mkdir -p $(DESTDIR)/$(TS_SCRIPTS_DIR)
+	cp -p $(TS_SCRIPTS) $(DESTDIR)/$(TS_SCRIPTS_DIR)
+	chmod 0755 $(DESTDIR)/$(TS_SCRIPTS_DIR)/*
 	mkdir -p $(DESTDIR)/$(SCRIPTS_DIR)
 	cp -p $(X_SCRIPTS) $(DESTDIR)/$(SCRIPTS_DIR)
 	chmod 0755 $(DESTDIR)/$(SCRIPTS_DIR)/*
