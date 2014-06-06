@@ -80,6 +80,7 @@ apply_on_off_prop() {
   local num_val=$(parse_bool "$value")
   if [ -n "$num_val" ]; then
     for DEVICE in $DEVICES ; do
+      logger "$0" "$XINPUT set-prop $DEVICE $prop_name $num_val"
       $XINPUT set-prop $DEVICE "$prop_name" "$num_val"
     done
     store_pref "$pref_name" "$num_val"
