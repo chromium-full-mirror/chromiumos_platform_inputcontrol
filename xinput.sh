@@ -12,8 +12,9 @@ pref_folder="/home/chronos/user/cmt"
 if ! [ -d $pref_folder ]; then
   mkdir $pref_folder
 fi
-chown chronos:chronos $pref_folder
-
+if [ "$(id -u)" -eq 0 ]; then
+  chown chronos:chronos $pref_folder
+fi;
 # Functions for storing preferences
 # A preference requires the following global variables:
 # pref_${pref}_type: device type this preference is appllied on
