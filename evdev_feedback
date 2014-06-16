@@ -8,10 +8,11 @@ logger -- "$0" "$@"
 
 base=/home/chronos/user/log
 if [ "$1" = "alt" ]; then
-  base=/debugd/touchpad
+  base=/tmp/touchpad
+  mkdir -p $base
 fi
 
 /opt/google/input/inputcontrol --log --logdir="$base"
 
-tar cf - $(ls -1t $base/evdev_input_events_*  | head -n 7 ) | \
+tar cf - $(ls -1t $base/evdev_input_events_* | head -n 7 ) 2>/dev/null | \
   uuencode -m touchscreen_activity_log.tar

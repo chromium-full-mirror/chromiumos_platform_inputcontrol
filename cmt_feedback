@@ -9,12 +9,13 @@ logger -- "$0" "$@"
 # Tar up the logs and uuencode them, since feedback needs to text.
 base=/home/chronos/user/log
 if [ "$1" = "alt" ]; then
-  base=/debugd/touchpad
+  base=/tmp/touchpad
+  mkdir -p $base
 fi
 
 # Dump the logs
 /opt/google/input/inputcontrol --log --logdir="$base"
 
 tar cf - $(ls -1t $base/touchpad_activity_* | head -n 7 ) \
-  $(ls -1t $base/cmt_input_events_*  | head -n 7 ) | \
+  $(ls -1t $base/cmt_input_events_*  | head -n 7 ) 2>/dev/null | \
   uuencode -m touchpad_activity_log.tar
