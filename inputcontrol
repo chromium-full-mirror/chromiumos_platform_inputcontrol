@@ -32,6 +32,27 @@ apply_mouse_swap_lr() {
       xargs $XINPUT set-button-map "$1"
 }
 
+apply_tp_custom_point_accel() {
+  the_id="$1"
+  values="$(echo "$2" | sed 's/,/ /g')"
+  $XINPUT set-prop "$the_id" "Pointer Accel Curve" \
+      $values
+}
+
+apply_tp_custom_scroll_accel() {
+  the_id="$1"
+  values="$(echo "$2" | sed 's/,/ /g')"
+  $XINPUT set-prop "$the_id" "Scroll Accel Curve" \
+      $values
+}
+
+apply_mouse_custom_point_accel() {
+  the_id="$1"
+  values="$(echo "$2" | sed 's/,/ /g')"
+  $XINPUT set-prop "$the_id" "Mouse Pointer Accel Curve" \
+      $values
+}
+
 # Generate activity log files for all devices
 generate_logs() {
   local devices="$1"
@@ -178,6 +199,27 @@ DEFINE_prop_preference nontouch_mouse mouse_australian_scrolling "[01]" "0" \
 DEFINE_preference touchpad touchpad_sensitivity "[12345]" "3"
 DEFINE_preference mouse mouse_sensitivity "[12345]" "3"
 DEFINE_preference mouse mouse_swap_lr "[01]" "0"
+DEFINE_prop_preference mouse mouse_old_accel "[01]" "0" \
+      "Old Mouse Accel Curves"
+
+default_curve_string() {
+  # Trick to print this string (up to % sign) 20 times
+  printf "inf 0 1 0 %.0s" {1..20}
+}
+
+DEFINE_preference touchpad tp_custom_point_accel "*" \
+      "$(default_curve_string)"
+DEFINE_preference multitouch tp_custom_scroll_accel "*" \
+      "$(default_curve_string)"
+DEFINE_preference mouse mouse_custom_point_accel "*" \
+      "$(default_curve_string)"
+
+DEFINE_prop_preference touchpad use_tp_custom_point_accel "[01]" "0" \
+      "Use Custom Touchpad Pointer Accel Curve"
+DEFINE_prop_preference multitouch use_tp_custom_scroll_accel "[01]" "0" \
+      "Use Custom Touchpad Scroll Accel Curve"
+DEFINE_prop_preference mouse use_mouse_custom_point_accel "[01]" "0" \
+      "Use Custom Mouse Pointer Accel Curve"
 
 main() {
   if ! [ -z ${FLAGS_add} ] ; then
@@ -208,7 +250,7 @@ main() {
   # Process preferences that have been set in arguments
   for pref in $preferences; do
     flag="$(eval echo \${FLAGS_$pref})"
-    if ! [ -z $flag ]; then
+    if ! [ -z "$flag" ]; then
       if validate_preference "$pref" "$flag"; then
         apply_preference "$pref" "$devices" "$flag"
         save_preference "$pref" "$flag"
