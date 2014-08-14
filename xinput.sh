@@ -38,9 +38,9 @@ apply_preference() {
 apply_all_preferences() {
   local devices="$1"
   for pref in $preferences; do
-    local value=$(load_preference $pref)
+    local value="$(load_preference $pref)"
     for device in $devices; do
-      apply_preference $pref $device $value
+      apply_preference $pref $device "$value"
     done
   done
 }
@@ -98,14 +98,14 @@ load_preference() {
   fi
 
   local file_size="$(stat -c %s $file)"
-  if [ "$file_size" != "2" ]; then
+  if [ "$file_size" -gt "1000" ]; then
     # invalid file size
     echo $default
     return
   fi
 
-  local value=$(cat ${file})
-  if validate_preference $pref $value; then
+  local value="$(cat ${file})"
+  if validate_preference $pref "$value"; then
     echo $value
   else
     echo $default
