@@ -258,6 +258,22 @@ main() {
     fi
   done
 
+  # Refresh other properties of touchpads/mice.
+  # We do this here because Chrome doesn't call --refresh.
+  # We abuse chrome's calls to set sensitivity.
+  if ! [ -z ${FLAGS_mouse_sensitivity} ] ; then
+    devs="$(list_mice)"
+    for dev in $devs; do
+      setup_device $dev
+    done
+  fi
+  if ! [ -z ${FLAGS_touchpad_sensitivity} ] ; then
+    devs="$(list_touchpads)"
+    for dev in $devs; do
+      setup_device $dev
+    done
+  fi
+
   # Process commands
   if [ ${FLAGS_list} -eq ${FLAGS_TRUE} ] ; then
     if ! [ -z $devices ]; then
