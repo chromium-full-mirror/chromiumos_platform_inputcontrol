@@ -140,6 +140,10 @@ find_mice() {
   done
 }
 
+# WARNING: This table is now deprecated. If you want to add new entries to it,
+# please instead add a new section in the 20-mouse.conf file in the xorg-conf
+# package.
+#
 # Returns the CPI (counts per inch) of the newly attached mouse. Since mice
 # generally don't report CPI, we use the following approach: By default, we
 # assume a CPI of 1000, as this is quite close to most mice on the market today
