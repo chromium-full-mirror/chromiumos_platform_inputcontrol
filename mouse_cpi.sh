@@ -54,6 +54,7 @@ get_mouse_cpi() {
     "17ef:6009") cpi=$trackpoint_cpi;;  # Lenovo ThinkPad Keyboard w/ TrackPoint
     "17ef:6014") cpi=800;;  # Lenovo N5901 multimedia keyboard/trackball*
     "17ef:602b") cpi=800;;  # Lenovo N5902 multimedia keyboard/OFN*
+    "17ef:6047") cpi=400;;  # Lenovo Compact Keyboard Trackpoint
     "1997:0409") cpi=800;;  # Riitek Rii Mote i6 (TouchPad)*
     "413c:3012") cpi=502;;  # Dell Computer Corp. Optical Wheel Mouse
   esac
