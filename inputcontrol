@@ -7,7 +7,6 @@ logger -- "$0" "$@"
 
 . /usr/share/misc/shflags
 . $(dirname "$0")/xinput.sh
-. $(dirname "$0")/mouse_cpi.sh
 
 # Sets mouse sensitivity preference
 apply_mouse_sensitivity() {
@@ -132,7 +131,6 @@ generate_logs() {
 # Mouse specific device setup
 setup_mouse() {
   local device="$1"
-  device_set_prop $device "Mouse CPI" $(get_mouse_cpi $device)
   device_set_prop $device "Device Accel Profile" -1
   device_set_prop $device "Device Accel Constant Deceleration" 1
   device_set_prop $device "Device Accel Velocity Scaling" 1

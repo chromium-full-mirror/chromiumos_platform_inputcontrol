@@ -24,7 +24,6 @@ SCRIPTS=\
 
 X_SCRIPTS=\
 	xinput.sh \
-	mouse_cpi.sh \
 	inputcontrol \
 	cmt_feedback \
 	evdev_feedback \
