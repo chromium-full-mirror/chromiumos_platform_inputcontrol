@@ -134,13 +134,6 @@ setup_mouse() {
   device_set_prop $device "Device Accel Profile" -1
   device_set_prop $device "Device Accel Constant Deceleration" 1
   device_set_prop $device "Device Accel Velocity Scaling" 1
-
-  # Kernel's Apple magicmouse driver by default will interpret mouse events, and
-  # we would like to turn off this interpretation.
-  if [ "$(device_get_vendor_product $device)" = "05ac:030d" ]; then
-    echo 0 > /sys/module/hid_magicmouse/parameters/emulate_3button
-    echo 0 > /sys/module/hid_magicmouse/parameters/emulate_scroll_wheel
-  fi
 }
 
 # Detup device preferences and properties

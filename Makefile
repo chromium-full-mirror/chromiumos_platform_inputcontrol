@@ -34,6 +34,8 @@ SCRIPTS_DIR=/opt/google/input/
 
 UDEV_RULE=99-inputcontrol.rules
 
+MODPROBE_CONF=modprobe.d/inputcontrol.conf
+
 INIT_DIR=/etc/init
 
 UPSTART_CONF=\
@@ -70,5 +72,7 @@ install: $(SCRIPTS)
 	mkdir -p $(DESTDIR)/$(SCRIPTS_DIR)
 	cp -p $(SCRIPTS) $(DESTDIR)/$(SCRIPTS_DIR)
 	chmod 0755 $(DESTDIR)/$(SCRIPTS_DIR)/*
+	install -D -m 0644 $(MODPROBE_CONF) \
+		$(DESTDIR)/etc/$(MODPROBE_CONF)
 	install -D -m 0644 $(UDEV_RULE) \
 		$(DESTDIR)/lib/udev/rules.d/$(UDEV_RULE)
